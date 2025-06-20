@@ -53,13 +53,19 @@ export class Order_window extends React.Component {
     return (
       <div className="orders-window">
         <div className="title">
-          <span className="name">{this.props.name}</span>
-          <span className={this.props.wait ? "wait" : "no-wait"}>
-            {this.props.wait ? "Waiting" : "Not waiting"}
+          <span
+            className="name"
+            style={{
+              color: this.props.powerNameColor,
+              flex: 1,
+              textAlign: "center",
+            }}
+          >
+            {this.props.name}
           </span>
           <button
             className="close-button"
-            onClick={this.props.onClose} // Appelle la fonction de fermeture
+            onClick={this.props.onClose}
           >
             Close
           </button>
@@ -76,4 +82,5 @@ Order_window.propTypes = {
   wait: PropTypes.bool,
   onRemove: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  powerNameColor: PropTypes.string, // Ajoute cette ligne
 };

@@ -1,5 +1,6 @@
 .orders-window {
-  position: relative; /* Fixe la fenêtre par rapport à la fenêtre du navigateur */
+  position: fixed;
+  left: 170px; /* Ajuste selon la position de ton bandeau */
   top: 100px; /* Position verticale */
   right: 20px; /* Décale la fenêtre à droite */
   width: 400px;
@@ -16,7 +17,7 @@
 
 .title {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   font-size: 18px;
   font-weight: bold;
@@ -25,7 +26,9 @@
 }
 
 .name {
-  color: #4169e1; /* Bleu pour le nom de la puissance */
+  flex: 1;
+  text-align: center;
+  /* la couleur est gérée en inline */
 }
 
 .wait {

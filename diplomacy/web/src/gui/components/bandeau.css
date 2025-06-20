@@ -13,7 +13,7 @@
 }
 
 .bandeau.expanded {
-  width: 300px; /* Augmente la largeur étendue */
+  width: 350px; /* Augmente la largeur étendue */
   height: auto; /* Hauteur ajustée au contenu */
   padding: 10px;
   border-radius: 0px 30px 30px 0px; /* Arrondit les bords à droite */
