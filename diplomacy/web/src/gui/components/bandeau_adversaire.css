@@ -1,0 +1,11 @@
+.btn-orders {
+    background-color: #ffc107; /* Jaune */
+    color: #000; /* Texte noir */
+    padding: 3px 5px; /* Espacement interne */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px; /* Taille du texte */
+    width: 70px; /* Largeur du bouton */
+    text-align: center; /* Centre le texte à l'intérieur */
+}

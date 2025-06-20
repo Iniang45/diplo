@@ -142,8 +142,10 @@ export const UTILS = {
         getTreeValue: function (obj, path) {
             let current = obj;
             for (let stepName of path) {
-                if (!current.hasOwnProperty(stepName))
+                if (!current || !current.hasOwnProperty(stepName)){
+                    console.error(`Invalid path: ${stepName} not found in current object`);
                     return null;
+                }
                 current = current[stepName];
             }
             if (current instanceof Dict)

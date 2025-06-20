@@ -1,0 +1,95 @@
+.custom-select-styled {
+  background-color: #000 !important; /* Fond noir */
+  border-radius: 18px; /* Bords arrondis */
+  color: #fff; /* Texte blanc */
+  cursor: pointer; /* Curseur en mode pointer */
+  border: 1px solid #444; /* Bordure grise */
+  padding: 0.375rem 0.75rem; /* Espacement interne */
+  font-size: 1rem; /* Taille de la police */
+  margin: 0 10px; /* Ajoute un espacement horizontal uniforme */
+}
+
+.custom-select-styled:focus {
+  outline: none; /* Supprime le contour par défaut */
+  border-color: #007bff; /* Bordure bleue lors du focus */
+}
+
+.form-group {
+  display: flex; /* Utilise flexbox pour aligner les éléments */
+  align-items: center; /* Centre verticalement les éléments */
+}
+
+.form-overlay-right {
+  position: absolute; /* Positionne le formulaire par rapport à son parent */
+  top: 10px; /* Place le formulaire en haut */
+  left: 50%; /* Centre horizontalement */
+  transform: translateX(-50%); /* Ajuste le centrage horizontal */
+  z-index: 10; /* Assure que le formulaire est au-dessus de la carte */
+  /*background-color: rgba(0, 0, 0, 0.7); /* Fond semi-transparent */
+  padding: 10px; /* Espacement interne */
+  border-radius: 8px; /* Bords arrondis */
+  color: white; /* Texte en blanc */
+}
+
+.inverted {
+  transform: scaleX(-1); /* Inverse horizontalement l'image */
+}
+
+.map-container {
+  position: relative; /* Permet de positionner les éléments enfants par rapport à la carte */
+}
+
+.bandeau {
+  top: 10%; /* Position verticale (ajustez selon vos besoins) */
+
+  width: 150px; /* Largeur du bandeau */
+  background-color: rgba(0, 0, 0, 0.7); /* Fond noir avec transparence */
+  color: #fff; /* Texte blanc */
+  padding: 10px;
+  border-radius: 5px; /* Bords arrondis */
+  z-index: 10; /* Assure que le bandeau est au-dessus de la carte */
+  transition: transform 0.3s ease, opacity 0.3s ease; /* Animation pour l'extension */
+}
+
+.bandeau:hover {
+  transform: scale(1.05); /* Agrandit légèrement au survol */
+  opacity: 1; /* Rend complètement visible au survol */
+  left: 5px;
+}
+
+.bandeau-wrapper {
+  position: absolute; /* Superpose les bandeaux à la carte */
+  top: 240px; /* Descend le conteneur des bandeaux (ajustez selon vos besoins) */
+  display: flex;
+  flex-direction: column; /* Aligne les bandeaux verticalement */
+  gap: 70px; /* Augmente l'espacement entre le bandeau principal et les bandeaux adverses */
+  z-index: 10; /* Assure que les bandeaux sont au-dessus de la carte */
+}
+
+.bandeau-container {
+  display: flex;
+  flex-direction: column; /* Aligne les bandeaux adverses verticalement */
+  gap: 70px; /* Augmente l'espacement entre les bandeaux adverses */
+}
+
+.ibou {
+  position: absolute;
+  bottom: 50px; /* Position en bas de la carte */
+  left: 0px; /* Position à droite de la carte */
+  z-index: 10; /* Assure que le bouton est au-dessus de la carte */
+}
+
+.ibra {
+  padding: 10px 20px; /* Espacement interne */
+  background-color: #000; /* Fond noir */
+  color: #fff; /* Texte blanc */
+  border: none;
+  border-radius: 100px; /* Coins arrondis avec un rayon de 100 */
+  cursor: pointer;
+  font-size: 14px; /* Taille du texte */
+  transition: background-color 0.3s ease;
+}
+
+.ibra:hover {
+  background-color: #333; /* Fond légèrement plus clair au survol */
+}

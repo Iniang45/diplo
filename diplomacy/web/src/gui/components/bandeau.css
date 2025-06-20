@@ -1,0 +1,133 @@
+.bandeau {
+  display: flex; /* Aligne les éléments horizontalement */
+  align-items: center; /* Centre verticalement les éléments */
+  color: #fff;
+  padding: 5px; /* Espacement interne */
+  border-radius: 10px; /* Bords arrondis */
+  width: 50px; /* Largeur initiale */
+  height: 50px; /* Hauteur fixe */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Ombre */
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease; /* Ajoute une transition pour l'opacité */
+  border-radius: 0px 30px 30px 0px;
+  opacity: 0.8; /* Rend le bandeau légèrement transparent */
+}
+
+.bandeau.expanded {
+  width: 300px; /* Augmente la largeur étendue */
+  height: auto; /* Hauteur ajustée au contenu */
+  padding: 10px;
+  border-radius: 0px 30px 30px 0px; /* Arrondit les bords à droite */
+  margin-left: 7px;
+  opacity: 0.8; /* Réduit légèrement la transparence pour le bandeau étendu */
+}
+
+.bandeau-chat-container {
+  display: flex;
+  flex-direction: column; /* Aligne les éléments verticalement */
+  align-items: center; /* Centre les éléments horizontalement */
+}
+
+.bandeau-chat-icon {
+  width: 30px; /* Taille de l'icône */
+  height: 30px;
+  cursor: pointer;
+}
+
+.bandeau-chat-label {
+  font-size: 10px; /* Taille du texte */
+  color: #fff; /* Couleur blanche */
+  margin-top: 5px; /* Ajoute un espacement entre l'icône et le texte */
+  text-align: center; /* Centre le texte */
+}
+
+.bandeau-center {
+  display: flex;
+  flex-direction: row; /* Aligne les boutons côte à côte */
+  gap: 5px; /* Espacement entre les boutons */
+  flex-grow: 1; /* Prend l'espace disponible au centre */
+  align-items: center; /* Centre verticalement les éléments */
+}
+
+.bandeau-info {
+  font-size: 14px;
+  margin-bottom: 5px; /* Ajoute un espacement entre le texte "Power" et le nombre de troupes */
+  line-height: 1.2; /* Ajuste l'espacement vertical */
+  position: relative; /* Permet de positionner le texte */
+  top: -5px; /* Décale le texte "Power" légèrement vers le haut */
+  text-align: center;
+}
+
+.bandeau-troops {
+  font-size: 20px; /* Taille du texte pour le nombre de troupes */
+  color: #fff; /* Couleur blanche pour le texte */
+  margin-top: 5px; /* Ajoute un espacement entre le texte "Power" et le nombre de troupes */
+  text-align: center;
+}
+
+.btn {
+  padding: 3px 5px; /* Réduit l'espacement interne */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 10px; /* Réduit la taille du texte */
+  width: 70px; /* Réduit la largeur des boutons */
+  text-align: center; /* Centre le texte à l'intérieur */
+}
+
+.btn-reset {
+  background-color: #c0c0c0 !important; /* Gris clair */
+  color: #000 !important; /* Texte noir */
+}
+
+.btn-waiting {
+  background-color: #ccc; /* Couleur par défaut (inactive) */
+  color: #000; /* Texte noir */
+  padding: 3px 5px; /* Espacement interne */
+  border: none;
+  border-radius: 5px;
+  font-size: 10px; /* Taille du texte */
+  width: 70px; /* Largeur du bouton */
+  text-align: center; /* Centre le texte à l'intérieur */
+  cursor: not-allowed; /* Indique que le bouton n'est pas cliquable */
+}
+
+.btn-waiting.waiting-active {
+  background-color: #ccc; /* Vert pour l'état actif */
+  color: #fff; /* Texte blanc */
+}
+
+.btn-waiting.waiting-inactive {
+  background-color: #28a745; /* Gris pour l'état inactif */
+  color: #000; /* Texte noir */
+}
+
+.bandeau-initials {
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center; /* Centre verticalement */
+  justify-content: center; /* Centre horizontalement */
+  height: 100%; /* Prend toute la hauteur du bandeau */
+  text-align: center; /* Centre le texte */
+  transition: font-size 0.3s ease; /* Transition pour la taille du texte */
+  margin-right: 10px; /* Décale les initiales légèrement vers la gauche */
+}
+
+.bandeau.expanded .bandeau-initials {
+  font-size: 24px; /* Augmente la taille du texte lorsque le bandeau est étendu */
+}
+
+.btn-orders {
+  margin-top: 5px;
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-orders:hover {
+  background-color: #0056b3;
+}
