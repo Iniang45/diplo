@@ -131,3 +131,26 @@
 .btn-orders:hover {
   background-color: #0056b3;
 }
+
+.btn-draw {
+  background-color: #28a745; /* Couleur par défaut */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-draw.hover-yes:hover {
+  background-color: #dc3545; /* Vert pour "yes" */
+}
+
+.btn-draw.hover-no:hover {
+  background-color: #007bff; /* Rouge pour "no" */
+}
+
+.btn-draw.hover-neutral:hover {
+  background-color: #28a745; /* Bleu pour "neutral" */
+}

@@ -64,9 +64,12 @@ export class Order_window extends React.Component {
             {this.props.name}
           </span>
           <button
-            className="close-button"
-            onClick={this.props.onClose}
+            className="update-orders-button"
+            onClick={this.props.onUpdate} // Appelle la méthode setOrders
           >
+            Update
+          </button>
+          <button className="close-button" onClick={this.props.onClose}>
             Close
           </button>
         </div>
@@ -82,5 +85,6 @@ Order_window.propTypes = {
   wait: PropTypes.bool,
   onRemove: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired, // Ajoute cette ligne
   powerNameColor: PropTypes.string, // Ajoute cette ligne
 };

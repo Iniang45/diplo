@@ -1,11 +1,21 @@
 .btn-orders {
-    background-color: #ffc107; /* Jaune */
-    color: #000; /* Texte noir */
-    padding: 3px 5px; /* Espacement interne */
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 10px; /* Taille du texte */
-    width: 70px; /* Largeur du bouton */
-    text-align: center; /* Centre le texte à l'intérieur */
+  background-color: #ffc107; /* Jaune */
+  color: #000; /* Texte noir */
+  padding: 3px 5px; /* Espacement interne */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 10px; /* Taille du texte */
+  width: 70px; /* Largeur du bouton */
+  text-align: center; /* Centre le texte à l'intérieur */
+}
+
+.btn-waiting.waiting-active {
+  background-color: #6c757d; /* Gris pour active (isWaiting === true) */
+  color: white; /* Texte blanc */
+}
+
+.btn-waiting.waiting-inactive {
+  background-color: #28a745; /* Vert pour inactive (isWaiting === false) */
+  color: white; /* Texte blanc */
 }

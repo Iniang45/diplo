@@ -75,14 +75,12 @@
 .ibou {
   position: absolute;
   bottom: 50px; /* Position en bas de la carte */
-  left: 0px; /* Position à droite de la carte */
+  left: 8px; /* Position à droite de la carte */
   z-index: 10; /* Assure que le bouton est au-dessus de la carte */
 }
 
 .ibra {
   padding: 10px 20px; /* Espacement interne */
-  background-color: #000; /* Fond noir */
-  color: #fff; /* Texte blanc */
   border: none;
   border-radius: 100px; /* Coins arrondis avec un rayon de 100 */
   cursor: pointer;
@@ -90,6 +88,49 @@
   transition: background-color 0.3s ease;
 }
 
+.btn-wait-true {
+  background-color: #a71d2a; /* Vert plus sombre */
+  color: white;
+}
+
+.btn-wait-false {
+  background-color: #1e7e34; /* Rouge plus sombre */
+  color: white;
+}
+
 .ibra:hover {
-  background-color: #333; /* Fond légèrement plus clair au survol */
+  opacity: 0.9; /* Légère transparence au survol */
+}
+
+.order-type-select {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10; /* Assurez-vous que le select est au-dessus de la carte */
+}
+
+.order-type-select label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.order-type-select select {
+  background-color: #007bff; /* Même couleur que les boutons */
+  color: white; /* Texte blanc */
+  border: none; /* Supprime la bordure */
+  padding: 5px 10px; /* Espacement interne similaire aux boutons */
+  border-radius: 3px; /* Coins arrondis comme les boutons */
+  cursor: pointer; /* Curseur en mode pointer */
+  font-size: 14px; /* Taille de la police */
+  width: auto; /* Ajuste automatiquement la largeur */
+}
+
+.order-type-select select:hover {
+  background-color: #007bff; /* Même effet au survol que les boutons */
+}
+.navigation-top-right {
+  position: absolute;
+  top: 10px; /* Position en haut */
+  right: 10px; /* Position à droite */
+  z-index: 10; /* Assure que le menu est au-dessus de la carte */
 }

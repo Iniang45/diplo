@@ -8,9 +8,9 @@ export const ChatWindow = ({
   renderPastMessages, // Prop pour afficher les anciens messages
   onClose, // Prop pour fermer la fenêtre
   textColors, // Prop pour les couleurs des textes
+  onViewHistory, // Nouvelle prop pour rediriger vers l'historique
 }) => {
   let messageInput = null;
-  const [showHistory, setShowHistory] = useState(false); // État pour afficher ou masquer la fenêtre des anciens messages
 
   const handleSendMessage = () => {
     const message = messageInput.value.trim();
@@ -34,8 +34,7 @@ export const ChatWindow = ({
           className="recipient-power"
           style={{ color: textColors.recipientPower }}
         >
-          {recipientPower === "GLOBAL" ? "General" : recipientPower}{" "}
-          {/* Affiche "General" si recipientPower est GLOBAL */}
+          {recipientPower === "GLOBAL" ? "General" : recipientPower}
         </span>
         <button className="close-chat-button" onClick={onClose}>
           Close
@@ -46,7 +45,7 @@ export const ChatWindow = ({
           type="text"
           className="message-input"
           placeholder="Send Message"
-          ref={(input) => (messageInput = input)} // Référence directe au champ de texte
+          ref={(input) => (messageInput = input)}
         />
         <button className="send-button" onClick={handleSendMessage}>
           ➤
@@ -54,24 +53,10 @@ export const ChatWindow = ({
       </div>
       <button
         className="history-button"
-        onClick={() => setShowHistory(true)} // Affiche la fenêtre des anciens messages
+        onClick={onViewHistory} // Appelle la méthode pour rediriger
       >
         View History
       </button>
-      {showHistory && (
-        <div className="message-history-window">
-          <button
-            className="close-history-button"
-            onClick={() => setShowHistory(false)} // Ferme la fenêtre des anciens messages
-          >
-            Close
-          </button>
-          <div className="message-history">
-            {/* Affiche les anciens messages */}
-            {renderPastMessages && renderPastMessages()}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

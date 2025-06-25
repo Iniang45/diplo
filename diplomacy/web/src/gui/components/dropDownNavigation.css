@@ -1,0 +1,43 @@
+.dropdown {
+  display: flex;
+  align-items: center; /* Centre verticalement les éléments */
+  justify-content: center; /* Centre horizontalement les éléments */
+  background-color: #6c757d; /* Couleur de fond gris foncé */
+  border-radius: 8px; /* Coins arrondis */
+  padding: 5px 10px; /* Espacement interne */
+  width: 100px; /* Largeur fixe pour le dropdown */
+  height: 40px; /* Hauteur fixe pour le dropdown */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Ombre subtile */
+}
+
+.dropdown-toggle {
+  background-color: transparent; /* Supprime le fond du bouton */
+  color: white; /* Texte blanc */
+  border: none; /* Supprime la bordure */
+  font-size: 14px; /* Taille du texte */
+  display: flex;
+  align-items: center; /* Centre verticalement les éléments */
+  justify-content: center; /* Centre horizontalement les éléments */
+  gap: 5px; /* Espacement entre le texte et l'icône */
+}
+
+.dropdown-toggle:hover {
+  background-color: #5a6268; /* Couleur légèrement plus foncée au survol */
+}
+
+.dropdown-menu {
+  background-color: #343a40; /* Fond gris foncé */
+  border: none; /* Supprime la bordure */
+  border-radius: 5px; /* Coins arrondis */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Ombre subtile */
+}
+
+.dropdown-item {
+  color: white; /* Texte blanc */
+  padding: 5px 10px; /* Espacement interne */
+  font-size: 14px; /* Taille du texte */
+}
+
+.dropdown-item:hover {
+  background-color: #495057; /* Couleur légèrement plus foncée au survol */
+}

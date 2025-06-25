@@ -60,6 +60,7 @@ import fastForward from "../../png/ff.png";
 import { Bandeau } from "../components/bandeau";
 import { BandeauAdversaire } from "../components/bandeau_adversaire";
 import { ChatWindow } from "../components/chat_window";
+import { DropdownNavigation } from "../components/dropDownNavigation";
 const HotKey = require("react-shortcut");
 /* Order management in game page.
  * When editing orders locally, we have to compare it to server orders
@@ -844,6 +845,8 @@ export class ContentGame extends React.Component {
   }
 
   onChangeOrderType(form) {
+    console.log("Order type changed to:", form.order_type);
+    console.log("Order path:", form.order_path);
     return this.setState({
       orderBuildingType: form.order_type,
       orderBuildingPath: [],
@@ -861,12 +864,20 @@ export class ContentGame extends React.Component {
       throw new Error(
         `Internal error: unable to detect current selected power name.`
       );
+    const currentVote = engine.powers[currentPowerName].vote || "neutral"; // Valeur par défaut "neutral"
+    let newVote;
+
+    if (currentVote === "neutral") {
+      newVote = "yes";
+    } else if (currentVote === "yes") {
+      newVote = "no";
+    } else {
+      newVote = "neutral";
+    }
     networkGame
-      .vote({ power_name: currentPowerName, vote: decision })
+      .vote({ power_name: currentPowerName, vote: newVote })
       .then(() =>
-        this.getPage().success(
-          `Vote set to ${decision} for ${currentPowerName}`
-        )
+        this.getPage().success(`Vote set to ${newVote} for ${currentPowerName}`)
       )
       .catch((error) => {
         Diplog.error(error.stack);
@@ -1207,11 +1218,26 @@ export class ContentGame extends React.Component {
         recipient === this.getCurrentPowerName() ? "GLOBAL" : recipient, // Change à "GLOBAL" si le destinataire est la puissance contrôlée
     }));
   }
+  handleViewHistory = () => {
+    this.setState({ tabMain: "messages" }); // Change l'onglet actif sur "messages"
+  };
   renderMapForCurrent(gameEngine, powerName, orderType, orderPath) {
     const Map = getMapComponent(gameEngine.map_name);
     const rawOrders = this.__get_orders(gameEngine);
     const orders = {};
     const currentPower = gameEngine.getPower(powerName);
+    const page = this.context;
+    const navigation = [
+      ["Help", () => page.dialog((onClose) => <Help onClose={onClose} />)],
+      ["Load a game from disk", page.loadGameFromDisk],
+      ["Save game to disk", () => saveGameToDisk(gameEngine, page.error)],
+      [`${UTILS.html.UNICODE_SMALL_LEFT_ARROW} Games`, () => page.loadGames()],
+      [
+        `${UTILS.html.UNICODE_SMALL_LEFT_ARROW} Leave game`,
+        () => page.leaveGame(gameEngine.game_id),
+      ],
+      [`${UTILS.html.UNICODE_SMALL_LEFT_ARROW} Logout`, page.logout],
+    ];
     const adversaryPowers = Object.keys(gameEngine.powers)
 
       .filter((power) => power !== powerName) // Exclure la puissance contrôlée
@@ -1239,6 +1265,23 @@ export class ContentGame extends React.Component {
     console.log("Orders:", orders);
     return (
       <div id="current-map" key="current-map" className="map-container">
+        <div className="order-type-select">
+          <label htmlFor="order-type">Select Order Type:</label>
+          <select
+            id="order-type"
+            className="form-control"
+            value={this.state.orderBuildingType || "M"} // Valeur par défaut
+            onChange={(event) =>
+              this.onChangeOrderType({ order_type: event.target.value })
+            }
+          >
+            <option value="M">Move</option>
+            <option value="S">Support</option>
+            <option value="H">Hold</option>
+            <option value="C">Convoy</option>
+          </select>
+        </div>
+
         <div className="bandeau-wrapper">
           {/* Bandeau principal */}
           <Bandeau
@@ -1246,10 +1289,12 @@ export class ContentGame extends React.Component {
             troopCount={currentPower.units.length}
             color={POWER_COLORS[powerName] || "#95a5a6"}
             onDeleteOrders={this.onRemoveAllCurrentPowerOrders}
-            onSetWait={() => this.setWaitFlag(true)}
+            onVoteDraw={() => this.vote()}
+            currentVote={gameEngine.powers[powerName].vote || "neutral"} // Passe la valeur actuelle du vote
             onOpenMessages={this.toggleChatWindow}
             orders={rawOrders[powerName]} // Convertit en tableau si nécessaire
             onRemoveOrder={this.onRemoveOrder}
+            setOrders={this.setOrders}
           />
 
           <div className="bandeau-container">
@@ -1273,6 +1318,12 @@ export class ContentGame extends React.Component {
               ))}
           </div>
         </div>
+        <div className="navigation-top-right">
+          <DropdownNavigation
+            navigation={navigation} // Passez les éléments de navigation
+            username={page.channel.username} // Passez le nom d'utilisateur
+          />
+        </div>
         <Map
           game={gameEngine}
           showAbbreviations={this.state.showAbbreviations}
@@ -1282,7 +1333,7 @@ export class ContentGame extends React.Component {
           onError={this.getPage().error}
           orderBuilding={ContentGame.getOrderBuilding(
             powerName,
-            orderType,
+            orderType, // Utilisez directement l'état
             orderPath
           )}
           onOrderBuilding={this.onOrderBuilding}
@@ -1303,6 +1354,7 @@ export class ContentGame extends React.Component {
               this.renderPastMessages(this.props.data, powerName)
             }
             onClose={() => this.toggleChatWindow(null)} // Ferme la fenêtre de chat
+            onViewHistory={this.handleViewHistory} // Passe la méthode pour afficher l'onglet des messages
             textColors={{
               controlledPower: POWER_COLORS[powerName] || "#95a5a6",
               recipientPower:
@@ -1313,10 +1365,12 @@ export class ContentGame extends React.Component {
 
         <div className="ibou">
           <button
-            className="ibra"
-            onClick={() => this.setWaitFlag(true)} // Appelle setWait avec true
+            className={`ibra ${
+              currentPower.wait ? "btn-wait-true" : "btn-wait-false"
+            }`}
+            onClick={() => this.setWaitFlag(!currentPower.wait)} // Bascule entre true et false
           >
-            Ready
+            {currentPower.wait ? "Cancel Ready" : "Ready"}
           </button>
         </div>
       </div>
@@ -1821,6 +1875,19 @@ export class ContentGame extends React.Component {
         */
     return (
       <main>
+        {/* Tab Current phase */}
+        {(mainTab === "current_phase" &&
+          hasTabCurrentPhase &&
+          this.renderTabCurrentPhase(
+            mainTab === "current_phase",
+            engine,
+            currentPowerName,
+            orderBuildingType,
+            this.state.orderBuildingPath,
+            currentPowerName,
+            currentTabOrderCreation
+          )) ||
+          ""}
         <Helmet>
           <title>{title} | Diplomacy</title>
         </Helmet>
@@ -1830,36 +1897,26 @@ export class ContentGame extends React.Component {
           username={page.channel.username}
           navigation={navigation}
         />
+        {/* Onglets déplacés ici */}
         <Tabs
           menu={tabNames}
           titles={tabTitles}
           onChange={this.onChangeMainTab}
           active={mainTab}
         >
-          {/* Tab Phase history. */}
+          {/* Tab Phase history */}
           {(hasTabPhaseHistory &&
             mainTab === "phase_history" &&
             this.renderTabResults(mainTab === "phase_history", engine)) ||
             ""}
+
+          {/* Tab Messages */}
           {mainTab === "messages" &&
             this.renderTabMessages(
               mainTab === "messages",
               engine,
               currentPowerName
             )}
-          {/* Tab Current phase. */}
-          {(mainTab === "current_phase" &&
-            hasTabCurrentPhase &&
-            this.renderTabCurrentPhase(
-              mainTab === "current_phase",
-              engine,
-              currentPowerName,
-              orderBuildingType,
-              this.state.orderBuildingPath,
-              currentPowerName,
-              currentTabOrderCreation
-            )) ||
-            ""}
         </Tabs>
       </main>
     );

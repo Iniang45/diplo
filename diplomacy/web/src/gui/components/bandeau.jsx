@@ -9,10 +9,12 @@ export const Bandeau = ({
   troopCount,
   color,
   onDeleteOrders,
-  onSetWait,
+  onVoteDraw, // Nouvelle prop pour voter pour un draw
   onOpenMessages,
   orders, // Ajout des ordres en prop
   onRemoveOrder, // Ajout de la fonction pour supprimer un ordre
+  setOrders,
+  currentVote, // Ajout de la prop pour le vote actuel
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showOrdersWindow, setShowOrdersWindow] = useState(false); // État pour afficher OrdersWindow
@@ -53,8 +55,21 @@ export const Bandeau = ({
               <button className="btn btn-reset" onClick={onDeleteOrders}>
                 Reset
               </button>
-              <button className="btn btn-waiting" onClick={onSetWait}>
-                Waiting
+              <button
+                className={`btn btn-draw ${
+                  currentVote === "neutral"
+                    ? "hover-neutral"
+                    : currentVote === "yes"
+                    ? "hover-yes"
+                    : "hover-no"
+                }`}
+                onClick={onVoteDraw} // Appelle la méthode vote
+              >
+                {currentVote === "neutral"
+                  ? "Vote for Draw"
+                  : currentVote === "yes"
+                  ? "Cancel Draw Vote"
+                  : "Set Neutral"}
               </button>
               <button
                 className="btn btn-orders"
@@ -83,6 +98,7 @@ export const Bandeau = ({
           onRemove={onRemoveOrder}
           onClose={() => setShowOrdersWindow(false)}
           powerNameColor={color} // Ajoute cette ligne
+          onUpdate={setOrders}
         />
       )}
     </>
@@ -94,8 +110,10 @@ Bandeau.propTypes = {
   troopCount: PropTypes.number.isRequired,
   color: PropTypes.string.isRequired, // Couleur associée à la puissance
   onDeleteOrders: PropTypes.func.isRequired,
-  onSetWait: PropTypes.func.isRequired,
+  onVoteDraw: PropTypes.func.isRequired, // Ajout de la prop pour voter pour un draw
   onOpenMessages: PropTypes.func.isRequired,
   orders: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired, // Accepte les objets ou tableaux
   onRemoveOrder: PropTypes.func.isRequired, // Ajout de la fonction pour supprimer un ordre
+  setOrders: PropTypes.func, // Ajout de la prop pour mettre à jour les ordres
+  currentVote: PropTypes.string.isRequired, // Ajout de la prop pour le vote actuel
 };
