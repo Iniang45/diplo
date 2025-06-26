@@ -59,7 +59,7 @@
 
 .bandeau-wrapper {
   position: absolute; /* Superpose les bandeaux à la carte */
-  top: 240px; /* Descend le conteneur des bandeaux (ajustez selon vos besoins) */
+  top: 180px; /* Descend le conteneur des bandeaux (ajustez selon vos besoins) */
   display: flex;
   flex-direction: column; /* Aligne les bandeaux verticalement */
   gap: 70px; /* Augmente l'espacement entre le bandeau principal et les bandeaux adverses */

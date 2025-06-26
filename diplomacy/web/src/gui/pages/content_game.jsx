@@ -1642,7 +1642,7 @@ export class ContentGame extends React.Component {
       <Tab id={"tab-current-phase"} display={toDisplay}>
         {
           <Row>
-            <div className={"col-xl-12 position-relative"}>
+            <div className={"col-xl-10 position-relative"}>
               <div className="form-overlay-right">
                 {this.__form_phases(pastPhases, phaseIndex)}
               </div>
@@ -1653,37 +1653,11 @@ export class ContentGame extends React.Component {
                 orderPath
               )}
             </div>
-            <div className={"col-xl 3"}>
-              <div className={"panel-orders mb-4"}>
-                {currentTabOrderCreation ? (
-                  <div className="mb-4">{currentTabOrderCreation}</div>
-                ) : (
-                  ""
-                )}
-                <PowerOrdersActionBar
-                  onReset={this.reloadServerOrders}
-                  onDeleteAll={this.onRemoveAllCurrentPowerOrders}
-                  onUpdate={this.setOrders}
-                  onProcess={
-                    !this.props.data.isPlayerGame() &&
-                    this.props.data.observer_level === STRINGS.MASTER_TYPE
-                      ? this.onProcessGame
-                      : null
-                  }
-                />
-                <div className={"orders"}>
-                  {this.renderOrders(this.props.data, powerName)}
-                </div>
-                <div className={"table-responsive"}>
-                  <Table
-                    className={"table table-striped table-sm"}
-                    caption={"Powers info"}
-                    columns={TABLE_POWER_VIEW}
-                    data={orderedPowers}
-                    wrapper={PowerView.wrap}
-                  />
-                </div>
-              </div>
+            <div className={"col-xl-2 position-relative"}>
+              {this.renderCurrentMessages(engine, currentPowerName)}
+
+              {/* Render Past Messages */}
+              {this.renderPastMessages(engine, currentPowerName)}
             </div>
           </Row>
         }
@@ -1888,36 +1862,6 @@ export class ContentGame extends React.Component {
             currentTabOrderCreation
           )) ||
           ""}
-        <Helmet>
-          <title>{title} | Diplomacy</title>
-        </Helmet>
-        <Navigation
-          title={title}
-          afterTitle={navAfterTitle}
-          username={page.channel.username}
-          navigation={navigation}
-        />
-        {/* Onglets déplacés ici */}
-        <Tabs
-          menu={tabNames}
-          titles={tabTitles}
-          onChange={this.onChangeMainTab}
-          active={mainTab}
-        >
-          {/* Tab Phase history */}
-          {(hasTabPhaseHistory &&
-            mainTab === "phase_history" &&
-            this.renderTabResults(mainTab === "phase_history", engine)) ||
-            ""}
-
-          {/* Tab Messages */}
-          {mainTab === "messages" &&
-            this.renderTabMessages(
-              mainTab === "messages",
-              engine,
-              currentPowerName
-            )}
-        </Tabs>
       </main>
     );
   }
