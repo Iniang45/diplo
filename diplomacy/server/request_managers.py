@@ -780,16 +780,30 @@ def on_send_game_message(server, request, connection_handler):
         :type server: diplomacy.Server
         :type request: diplomacy.communication.requests.SendGameMessage
     """
-    level = verify_request(server, request, connection_handler, omniscient_role=False, observer_role=False)
+    level = verify_request(server, request, connection_handler, omniscient_role=False, observer_role=True)
     token, message = request.token, request.message
     assert_game_not_finished(level.game)
     if level.game.no_press:
         raise exceptions.ResponseException('Messages not allowed for this game.')
-    if request.game_role != message.sender:
+    """
+    # Si l'utilisateur est un observateur, utiliser currentPowerName comme sender
+    if request.game_role == strings.OBSERVER_TYPE:
+        currentPowerName = message.sender
+        print("Received currentPowerName:", currentPowerName)
+        print(level.game.map.powers)
+        request.game_role = currentPowerName
+        if level.game.has_power(currentPowerName):
+            message.sender = currentPowerName
+        else:
+            raise exceptions.MapPowerException(currentPowerName)
+    """
+
+    if request.game_role != message.sender and request.game_role != strings.OBSERVER_TYPE:
         raise exceptions.ResponseException('A power can only send its own messages.')
 
     if not level.game.has_power(message.sender):
         raise exceptions.MapPowerException(message.sender)
+
     if not request.message.is_global():
         if level.game.public_press:
             raise exceptions.ResponseException('Only public messages allowed for this game.')
@@ -799,12 +813,11 @@ def on_send_game_message(server, request, connection_handler):
             raise exceptions.GamePhaseException(level.game.current_short_phase, message.phase)
         if not level.game.has_power(message.recipient):
             raise exceptions.MapPowerException(message.recipient)
-        username = server.users.get_name(token)
-        power_name = message.sender
-        if not level.game.is_controlled_by(power_name, username):
-            raise exceptions.ResponseException('Power name %s is not controlled by given username.' % power_name)
-        if message.sender == message.recipient:
-            raise exceptions.ResponseException('A power cannot send message to itself.')
+        
+#if not level.game.is_controlled_by(power_name, username):
+            #raise exceptions.ResponseException('Power name %s is not controlled by given username.' % power_name)
+        #if message.sender == message.recipient:
+            #raise exceptions.ResponseException('A power cannot send message to itself.')
 
     if request.re_sent:
         # Request is re-sent (e.g. after a synchronization). We may have already received this message.
@@ -823,6 +836,9 @@ def on_send_game_message(server, request, connection_handler):
     message.time_sent = level.game.add_message(message)
     Notifier(server, ignore_addresses=[(request.game_role, token)]).notify_game_message(level.game, message)
     server.save_game(level.game)
+    print(message.recipient)
+    print(request.game_role)
+    print(message)
     return responses.DataTimeStamp(data=message.time_sent, request_id=request.request_id)
 
 def on_set_dummy_powers(server, request, connection_handler):

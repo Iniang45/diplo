@@ -134,3 +134,21 @@
   right: 10px; /* Position à droite */
   z-index: 10; /* Assure que le menu est au-dessus de la carte */
 }
+
+.nation-selection-dialog {
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.nation-selection-dialog h3 {
+  margin-bottom: 15px;
+}
+
+.nation-selection-dialog select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+}

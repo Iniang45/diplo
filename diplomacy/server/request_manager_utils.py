@@ -200,7 +200,7 @@ def verify_request(server, request, connection_handler,
             # Check if observer role is accepted (for this call).
             if not observer_role:
                 raise exceptions.ResponseException(
-                    'Observer role disallowed for request %s' % request.game_role)
+                    'Observer role disallowed for request ouga ouga  %s' % request.game_role % observer_role)
 
             # Check if request token is known as observer token by related game.
             if not server_game.has_observer_token(request.token):
@@ -208,9 +208,13 @@ def verify_request(server, request, connection_handler,
 
             # Create game request level object.
             level = GameRequestLevel.observer_level(server_game, power_name)
-
+            
+            level.power_name = "AUSTRIA"
+            power_name = level.power_name
+       
         # Check if we have a valid power name if power name is required (for this call) or given.
         if power_name is None:
+            
             if require_power:
                 raise exceptions.MapPowerException(None)
         elif not server_game.has_power(power_name):
@@ -238,7 +242,6 @@ def verify_request(server, request, connection_handler,
 
         # Create game request level.
         level = GameRequestLevel.power_level(server_game, power_name)
-
     return level
 
 def transfer_special_tokens(server_game, server, username, grade_update, from_observation=True):

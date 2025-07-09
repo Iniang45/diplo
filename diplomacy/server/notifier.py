@@ -343,6 +343,8 @@ class Notifier:
                                                                      game_id=server_game.game_id,
                                                                      game_role=game_role,
                                                                      message=game_message))
+            observer_addresses = server_game.get_observer_addresses()
+            yield self.notify_game_addresses(server_game.game_id, observer_addresses, notifications.GameMessageReceived, message=game_message)
 
     @gen.coroutine
     def notify_game_addresses(self, game_id, addresses, notification_class, **kwargs):

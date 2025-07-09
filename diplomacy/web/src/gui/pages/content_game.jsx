@@ -462,6 +462,7 @@ export class ContentGame extends React.Component {
   }
 
   notifiedNewGameMessage(networkGame, notification) {
+    console.log("New game message notification:", notification);
     let protagonist = notification.message.sender;
     if (notification.message.recipient === "GLOBAL")
       protagonist = notification.message.recipient;
@@ -479,6 +480,7 @@ export class ContentGame extends React.Component {
       game.queue.append(notification);
     };
     const consumer = (notification) => {
+      console.log("Notification received:", notification.name);
       switch (notification.name) {
         case "powers_controllers":
           return this.notifiedPowersControllers(networkGame, notification);
@@ -550,16 +552,23 @@ export class ContentGame extends React.Component {
 
   sendMessage(networkGame, recipient, body) {
     const engine = networkGame.local;
-    const actualRecipient = recipient === engine.role ? "GLOBAL" : recipient;
+    const currentPowerName = this.getCurrentPowerName();
+    let actualRecipient = recipient;
+    if (recipient === currentPowerName) {
+      actualRecipient = currentPowerName;
+    } else if (recipient === "GLOBAL") {
+      actualRecipient = "GLOBAL";
+    }
     const message = new Message({
       phase: engine.phase,
-      sender: engine.role,
+      sender: currentPowerName,
       recipient: actualRecipient,
       message: body,
     });
+    console.log("Sending message:", message, "zbouzboub", currentPowerName);
     const page = this.getPage();
     networkGame
-      .sendGameMessage({ message: message })
+      .sendGameMessage({ message: message, currentPowerName: currentPowerName })
       .then(() => {
         page.load(`game: ${engine.game_id}`, <ContentGame data={engine} />, {
           success: `Message sent: ${JSON.stringify(message)}`,
@@ -1000,6 +1009,33 @@ export class ContentGame extends React.Component {
       historyCurrentOrders: orders && orders.length ? orders : null,
     });
   }
+  showNationSelectionDialog() {
+    const engine = this.props.data;
+    const powerNames = Object.keys(engine.powers).sort(); // Liste des nations disponibles
+
+    this.getPage().dialog((onClose) => (
+      <div className="nation-selection-dialog">
+        <h3>Select a Nation</h3>
+        <select
+          className="form-control"
+          onChange={(event) => {
+            const selectedNation = event.target.value;
+            this.setState({ power: selectedNation }); // Définit le currentPowerName
+            onClose(); // Ferme la boîte de dialogue
+          }}
+        >
+          <option value="" disabled selected>
+            Choose a nation
+          </option>
+          {powerNames.map((powerName) => (
+            <option key={powerName} value={powerName}>
+              {powerName}
+            </option>
+          ))}
+        </select>
+      </div>
+    ));
+  }
 
   // [ Rendering methods.
 
@@ -1029,9 +1065,7 @@ export class ContentGame extends React.Component {
   renderPastMessages(engine, role) {
     const messageChannels = engine.getMessageChannels(role, true);
     const tabNames = [];
-    console.log(tabNames);
-    for (let powerName of Object.keys(engine.powers))
-      if (powerName !== role) tabNames.push(powerName);
+    for (let powerName of Object.keys(engine.powers)) tabNames.push(powerName);
     tabNames.sort();
     tabNames.push("GLOBAL");
     const titles = tabNames.map((tabName) =>
@@ -1081,8 +1115,7 @@ export class ContentGame extends React.Component {
   renderCurrentMessages(engine, role) {
     const messageChannels = engine.getMessageChannels(role, true);
     const tabNames = [];
-    for (let powerName of Object.keys(engine.powers))
-      if (powerName !== role) tabNames.push(powerName);
+    for (let powerName of Object.keys(engine.powers)) tabNames.push(powerName);
     tabNames.sort();
     tabNames.push("GLOBAL");
     const titles = tabNames.map((tabName) =>
@@ -1091,7 +1124,6 @@ export class ContentGame extends React.Component {
     const currentTabId = this.state.tabCurrentMessages || tabNames[0];
     const highlights = this.state.messageHighlights;
     const unreadMarked = new Set();
-
     return (
       <div className={"panel-messages"} key={"panel-messages"}>
         {/* Messages. */}
@@ -1119,7 +1151,7 @@ export class ContentGame extends React.Component {
                 messageChannels[protagonist].map((message, index) => {
                   let id = null;
                   if (!message.read && !unreadMarked.has(protagonist)) {
-                    if (engine.isOmniscientGame() || message.sender !== role) {
+                    if (engine.isOmniscientGame()) {
                       unreadMarked.add(protagonist);
                       id = `${protagonist}-unread`;
                     }
@@ -1151,7 +1183,7 @@ export class ContentGame extends React.Component {
           </Scrollchor>
         )}
         {/* Send form. */}
-        {engine.isPlayerGame() && (
+        {(engine.isPlayerGame() || engine.isObserverGame()) && (
           <MessageForm
             sender={role}
             recipient={currentTabId}
@@ -1655,9 +1687,6 @@ export class ContentGame extends React.Component {
             </div>
             <div className={"col-xl-2 position-relative"}>
               {this.renderCurrentMessages(engine, currentPowerName)}
-
-              {/* Render Past Messages */}
-              {this.renderPastMessages(engine, currentPowerName)}
             </div>
           </Row>
         }
@@ -1705,6 +1734,7 @@ export class ContentGame extends React.Component {
       tabNames.push("phase_history");
       tabTitles.push("Results");
     }
+
     tabNames.push("messages");
     tabTitles.push("Messages");
     if (controllablePowers.length && phaseType && !engine.isObserverGame()) {
@@ -1862,6 +1892,12 @@ export class ContentGame extends React.Component {
             currentTabOrderCreation
           )) ||
           ""}
+        {mainTab === "messages" &&
+          this.renderTabMessages(
+            mainTab === "messages",
+            engine,
+            currentPowerName
+          )}
       </main>
     );
   }
@@ -1871,6 +1907,10 @@ export class ContentGame extends React.Component {
     if (this.props.data.client)
       this.reloadDeadlineTimer(this.props.data.client);
     this.props.data.displayed = true;
+    if (this.props.data.role === STRINGS.OBSERVER_TYPE) {
+      this.showNationSelectionDialog(); // Affiche la boîte de dialogue pour choisir une nation
+    }
+
     // Try to prevent scrolling when pressing keys Home and End.
     document.onkeydown = (event) => {
       if (["home", "end"].includes(event.key.toLowerCase())) {
