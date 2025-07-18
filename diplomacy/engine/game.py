@@ -574,7 +574,7 @@ class Game(Jsonable):
         if expected_count is None:
             expected_count = len(self.powers)
         return expected_count
-
+    
     def get_dummy_power_names(self):
         """ Return sequence of not eliminated dummy power names. """
         return set(power_name for power_name in self.get_map_power_names()

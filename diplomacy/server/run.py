@@ -31,7 +31,7 @@
 import argparse
 from diplomacy import Server
 from diplomacy.utils import constants
-
+global_server = None
 if __name__ == '__main__':
     PARSER = argparse.ArgumentParser(description='Run server.')
     PARSER.add_argument('--port', '-p', type=int, default=constants.DEFAULT_PORT,
@@ -39,6 +39,8 @@ if __name__ == '__main__':
     ARGS = PARSER.parse_args()
 
     try:
-        Server().start(port=ARGS.port)
+        global_server = Server()
+        global_server.start(port=ARGS.port)
+        #Server().start(port=ARGS.port)
     except KeyboardInterrupt:
         print('Keyboard interruption.')

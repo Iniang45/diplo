@@ -39,7 +39,7 @@ from diplomacy.utils import exceptions, strings, constants, export
 from diplomacy.utils.common import hash_password
 from diplomacy.utils.constants import OrderSettings
 from diplomacy.utils.game_phase_data import GamePhaseData
-
+from diplomacy.communication.requests import GetReceptionAddresses
 LOGGER = logging.getLogger(__name__)
 
 # =================
@@ -95,7 +95,21 @@ def on_clear_units(server, request, connection_handler):
     assert_game_not_finished(level.game)
     level.game.clear_units(level.power_name)
     Notifier(server, ignore_addresses=[request.address_in_game]).notify_cleared_units(level.game, level.power_name)
-
+def on_get_reception_addresses(server, request, connection_handler, game):
+    """
+    Handle the request to get reception addresses for a game.
+    :param server: The server instance.
+    :param request: The request object.
+    :param connection_handler: The connection handler for the client.
+    :param game: The game instance.
+    :return: A dictionary containing the reception addresses.
+    """
+    server_game = server.get_game(request.game_id)  # Récupérer l'instance de ServerGame
+    if not server_game:
+        raise ValueError(f"Game with ID {request.game_id} not found.")
+    
+    addresses = list(server_game.get_reception_addresses())
+    return {'addresses': addresses}
 def on_create_game(server, request, connection_handler):
     """ Manage request CreateGame.
 
@@ -1251,6 +1265,7 @@ MAPPING = {
     requests.Synchronize: on_synchronize,
     requests.UnknownToken: on_unknown_token,
     requests.Vote: on_vote,
+    GetReceptionAddresses: on_get_reception_addresses,
 }
 
 def handle_request(server, request, connection_handler):

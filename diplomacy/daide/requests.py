@@ -748,7 +748,9 @@ class SyntaxErrorRequest(DaideRequest):
 # ====================
 # Admin Messages
 # ====================
-
+class GetReceptionAddresses(DaideRequest):
+    name = 'get_reception_addresses'
+    level = strings.GAME
 class AdminMessageRequest(DaideRequest):
     """ Represents a ADM DAIDE request. Can be sent by the client to send a message to all clients.
         Should not be used for negotiation.

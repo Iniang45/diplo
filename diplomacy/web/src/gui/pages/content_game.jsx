@@ -152,6 +152,7 @@ export class ContentGame extends React.Component {
       showAbbreviations: true,
       showChatWindow: false, // État pour afficher ou masquer le ChatWindow
       chatRecipient: null, // Destinataire du chat
+      connectedUsers: [],
     };
 
     // Bind some class methods to this instance.
@@ -1111,7 +1112,27 @@ export class ContentGame extends React.Component {
       </div>
     );
   }
-
+  async fetchReceptionAddresses() {
+    console.log("Game ID:", this.props.data.game_id);
+    console.log("Game instances:", this.props.channel.game_id_to_instances);
+    console.log(
+      "Game instance for game_id:",
+      this.props.channel.game_id_to_instances[this.props.data.game_id]
+    );
+    try {
+      if (!this.props.channel || !this.props.channel.getReceptionAddresses) {
+        throw new Error("Channel or get_reception_addresses is not defined");
+      }
+      const response = await this.props.channel.getReceptionAddresses({
+        game_id: this.props.data.game_id,
+      });
+      const addresses = response.addresses;
+      console.log("Reception Addresses:", addresses);
+      this.setState({ connectedUsers: addresses });
+    } catch (error) {
+      console.error("Failed to fetch reception addresses:", error);
+    }
+  }
   renderCurrentMessages(engine, role) {
     const messageChannels = engine.getMessageChannels(role, true);
     const tabNames = [];
@@ -1124,6 +1145,7 @@ export class ContentGame extends React.Component {
     const currentTabId = this.state.tabCurrentMessages || tabNames[0];
     const highlights = this.state.messageHighlights;
     const unreadMarked = new Set();
+
     return (
       <div className={"panel-messages"} key={"panel-messages"}>
         {/* Messages. */}
@@ -1182,11 +1204,38 @@ export class ContentGame extends React.Component {
             Go to 1st unread message
           </Scrollchor>
         )}
+        <div className="message-recipient">
+          <label htmlFor="recipient-select">Select recipient:</label>
+          <select
+            id="recipient-select"
+            className="form-control"
+            value={this.state.chatRecipient || ""}
+            onChange={(event) =>
+              this.setState({ chatRecipient: event.target.value })
+            }
+          >
+            <option value="" disabled>
+              Neutral
+            </option>
+            {this.state.connectedUsers &&
+            this.state.connectedUsers.length > 0 ? (
+              this.state.connectedUsers.map((address, index) => (
+                <option key={index} value={address[1]}>
+                  {address[0]} ({address[1]})
+                </option>
+              ))
+            ) : (
+              <option disabled>Loading...</option>
+            )}
+            <option value="GLOBAL">GLOBAL</option>
+          </select>
+        </div>
         {/* Send form. */}
+
         {(engine.isPlayerGame() || engine.isObserverGame()) && (
           <MessageForm
             sender={role}
-            recipient={currentTabId}
+            recipient={this.state.chatRecipient || currentTabId}
             onSubmit={(form) =>
               this.sendMessage(engine.client, currentTabId, form.message)
             }
@@ -1222,8 +1271,20 @@ export class ContentGame extends React.Component {
 
   renderMapForMessages(gameEngine, showOrders) {
     const Map = getMapComponent(gameEngine.map_name);
+    const currentPowerName = this.getCurrentPowerName(); // Récupère la puissance observée
+    const rawOrders = this.__get_orders(gameEngine);
+    const orders = {};
+
+    // Filtrer les ordres pour inclure uniquement ceux de la puissance observée
+    if (rawOrders[currentPowerName]) {
+      orders[currentPowerName] = [];
+      for (let orderObject of Object.values(rawOrders[currentPowerName])) {
+        orders[currentPowerName].push(orderObject.order); // Conserve uniquement la chaîne `order`
+      }
+    }
+
     return (
-      <div id="messages-map" key="messages-map">
+      <div id="messages-map" key="messages-map" className="map-container">
         <Map
           game={gameEngine}
           showAbbreviations={this.state.showAbbreviations}
@@ -1231,14 +1292,9 @@ export class ContentGame extends React.Component {
             new MapData(this.getMapInfo(gameEngine.map_name), gameEngine)
           }
           onError={this.getPage().error}
-          orders={
-            (showOrders &&
-              gameEngine.order_history.contains(gameEngine.phase) &&
-              gameEngine.order_history.get(gameEngine.phase)) ||
-            null
-          }
-          onHover={showOrders ? this.displayLocationOrders : null}
-          onSelectVia={this.onSelectVia}
+          orders={orders} // Passe uniquement les ordres de la puissance observée
+          onSelectLocation={null} // Désactive la sélection de location
+          onSelectVia={null} // Désactive la sélection de chemin
         />
       </div>
     );
@@ -1301,7 +1357,6 @@ export class ContentGame extends React.Component {
           <label htmlFor="order-type">Select Order Type:</label>
           <select
             id="order-type"
-            className="form-control"
             value={this.state.orderBuildingType || "M"} // Valeur par défaut
             onChange={(event) =>
               this.onChangeOrderType({ order_type: event.target.value })
@@ -1621,6 +1676,7 @@ export class ContentGame extends React.Component {
                 {this.state.historyCurrentOrders.join(", ")}
               </div>
             )}
+
             {this.renderMapForMessages(engine, this.state.historyShowOrders)}
           </div>
           <div className={"col-xl"}>
@@ -1910,7 +1966,8 @@ export class ContentGame extends React.Component {
     if (this.props.data.role === STRINGS.OBSERVER_TYPE) {
       this.showNationSelectionDialog(); // Affiche la boîte de dialogue pour choisir une nation
     }
-
+    console.log("Channel in ContentGame:", this.props.channel);
+    this.fetchReceptionAddresses();
     // Try to prevent scrolling when pressing keys Home and End.
     document.onkeydown = (event) => {
       if (["home", "end"].includes(event.key.toLowerCase())) {

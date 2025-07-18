@@ -27,7 +27,7 @@ from diplomacy.server import request_managers as internal_request_managers
 from diplomacy.server.user import DaideUser
 from diplomacy.utils import errors as err, exceptions, strings, splitter
 from diplomacy.utils.order_results import OK
-
+from diplomacy.communication.requests import GetReceptionAddresses
 # =================
 # Request managers.
 # =================
@@ -593,6 +593,16 @@ def on_admin_message_request(server, request, connection_handler, game):
     if not ADM_MESSAGE_ENABLED:
         return [responses.REJ(bytes(request))]
     return None
+def on_get_reception_addresses(server, request, connection_handler, game):
+    """
+    Handle the request to get reception addresses for a game.
+    """
+    server_game = server.get_game(request.game_id)
+    if not server_game:
+        raise ValueError(f"Game with ID {request.game_id} not found.")
+    
+    addresses = list(server_game.get_reception_addresses())
+    return {'addresses': addresses}
 
 # Mapping dictionary from request class to request handler function.
 MAPPING = {
@@ -616,7 +626,8 @@ MAPPING = {
     requests.RejectRequest: on_reject_request,
     requests.ParenthesisErrorRequest: on_parenthesis_error_request,
     requests.SyntaxErrorRequest: on_syntax_error_request,
-    requests.AdminMessageRequest: on_admin_message_request
+    requests.AdminMessageRequest: on_admin_message_request,
+    GetReceptionAddresses: on_get_reception_addresses,
 }
 
 def handle_request(server, request, connection_handler):

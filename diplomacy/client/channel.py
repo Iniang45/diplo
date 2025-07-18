@@ -25,7 +25,6 @@ from tornado import gen
 
 from diplomacy.communication import requests
 from diplomacy.utils import strings, common
-
 LOGGER = logging.getLogger(__name__)
 
 def _req_fn(request_class, local_req_fn=None, **request_args):
@@ -138,6 +137,7 @@ class Channel:
     join_powers = _req_fn(requests.JoinPowers)
     list_games = _req_fn(requests.ListGames)
     get_games_info = _req_fn(requests.GetGamesInfo)
+    get_reception_addresses = _req_fn(requests.GetReceptionAddresses)
     get_dummy_waiting_powers = _req_fn(requests.GetDummyWaitingPowers)
 
     # User Account API.

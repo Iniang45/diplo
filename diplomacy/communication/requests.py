@@ -819,7 +819,9 @@ class Synchronize(_AbstractGameRequest):
     def __init__(self, **kwargs):
         self.timestamp = None  # type: int
         super(Synchronize, self).__init__(**kwargs)
-
+class GetReceptionAddresses(_AbstractGameRequest):
+    name = 'get_reception_addresses'
+    level = strings.GAME
 class Vote(_AbstractGameRequest):
     """ Game request to vote for draw decision.
         If number of pro-draw votes > number of con-draw votes for current phase,
