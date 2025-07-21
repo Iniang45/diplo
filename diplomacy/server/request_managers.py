@@ -26,7 +26,7 @@
 """
 #pylint:disable=too-many-lines
 import logging
-
+import json
 from tornado import gen
 from tornado.concurrent import Future
 
@@ -95,21 +95,38 @@ def on_clear_units(server, request, connection_handler):
     assert_game_not_finished(level.game)
     level.game.clear_units(level.power_name)
     Notifier(server, ignore_addresses=[request.address_in_game]).notify_cleared_units(level.game, level.power_name)
-def on_get_reception_addresses(server, request, connection_handler, game):
+def on_get_reception_addresses(server, request, connection_handler):
     """
-    Handle the request to get reception addresses for a game.
+    Handle the request to get all usernames for a game.
     :param server: The server instance.
     :param request: The request object.
     :param connection_handler: The connection handler for the client.
-    :param game: The game instance.
-    :return: A dictionary containing the reception addresses.
+    :return: A DataSavedGame response containing all usernames.
     """
-    server_game = server.get_game(request.game_id)  # Récupérer l'instance de ServerGame
-    if not server_game:
-        raise ValueError(f"Game with ID {request.game_id} not found.")
+    print(f"Received get_reception_addresses request for game ID: {request.game_id}")
     
-    addresses = list(server_game.get_reception_addresses())
-    return {'addresses': addresses}
+    # Récupérer l'instance de ServerGame
+    server_game = server.get_game(request.game_id)
+    if not server_game:
+        raise exceptions.GameIdException(f"Game with ID {request.game_id} not found.")
+    
+    print(f"Server game found: {server_game}")
+    
+    # Récupérer toutes les adresses de réception
+    reception_addresses = list(server_game.get_reception_addresses())
+    print(f"Reception addresses: {reception_addresses}")
+    
+    # Récupérer les noms d'utilisateurs à partir des tokens
+    usernames = []
+    for _, token in reception_addresses:
+        username = server.users.get_name(token)
+        if username:
+            usernames.append(username)
+    
+    print(f"Usernames found: {usernames}")
+    
+    # Retourner un objet DataSavedGame contenant les usernames
+    return responses.DataSavedGame(data={'usernames': usernames}, request_id=request.request_id)
 def on_create_game(server, request, connection_handler):
     """ Manage request CreateGame.
 
@@ -1287,8 +1304,11 @@ def handle_request(server, request, connection_handler):
     # Create and return a future.
     future = Future()
     try:
+        print(f"Calling handler for request: {type(request).__name__}")
         result = request_handler_fn(server, request, connection_handler)
+        print(f"Handler result: {result}")
         future.set_result(result)
     except exceptions.DiplomacyException as exc:
+        print(f"Exception in handler: {exc}")
         future.set_exception(exc)
     return future

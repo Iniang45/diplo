@@ -1113,25 +1113,15 @@ export class ContentGame extends React.Component {
     );
   }
   async fetchReceptionAddresses() {
-    console.log("Game ID:", this.props.data.game_id);
-    console.log("Game instances:", this.props.channel.game_id_to_instances);
-    console.log(
-      "Game instance for game_id:",
-      this.props.channel.game_id_to_instances[this.props.data.game_id]
-    );
-    try {
-      if (!this.props.channel || !this.props.channel.getReceptionAddresses) {
-        throw new Error("Channel or get_reception_addresses is not defined");
-      }
-      const response = await this.props.channel.getReceptionAddresses({
-        game_id: this.props.data.game_id,
+    this.props.channel
+      .getReceptionAddresses({ game_id: this.props.data.game_id })
+      .then((response) => {
+        console.log("Usernames:", response.usernames);
+        this.setState({ connectedUsers: response.usernames });
+      })
+      .catch((error) => {
+        console.error("Failed to fetch reception addresses:", error);
       });
-      const addresses = response.addresses;
-      console.log("Reception Addresses:", addresses);
-      this.setState({ connectedUsers: addresses });
-    } catch (error) {
-      console.error("Failed to fetch reception addresses:", error);
-    }
   }
   renderCurrentMessages(engine, role) {
     const messageChannels = engine.getMessageChannels(role, true);
@@ -1219,9 +1209,9 @@ export class ContentGame extends React.Component {
             </option>
             {this.state.connectedUsers &&
             this.state.connectedUsers.length > 0 ? (
-              this.state.connectedUsers.map((address, index) => (
-                <option key={index} value={address[1]}>
-                  {address[0]} ({address[1]})
+              this.state.connectedUsers.map((username, index) => (
+                <option key={index} value={username}>
+                  {username}
                 </option>
               ))
             ) : (

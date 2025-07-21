@@ -147,7 +147,10 @@ export class Channel {
     console.log("Pdadaa:", parameters);
     console.log("les dodz:", this.game_id_to_instances);
     console.log("dzdzdzdzzd:", this.game_id_to_instances[parameters.game_id]);
-    const game = this.game_id_to_instances[parameters.game_id];
+    const gameInstanceSet = this.game_id_to_instances[parameters.game_id];
+    const games = gameInstanceSet.getGames(); // Retourne un tableau d'instances de jeu
+    const game = games[0]; // Exemple : prenez la première instance
+    console.log("Game instance:", game);
     if (!game) {
       throw new Error(`Game with ID ${parameters.game_id} not found.`);
     }
@@ -156,7 +159,7 @@ export class Channel {
       "get_reception_addresses",
       undefined,
       undefined,
-      parameters,
+      { ...parameters, token: this.token },
       game
     );
   }

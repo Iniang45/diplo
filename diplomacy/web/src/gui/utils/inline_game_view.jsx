@@ -40,8 +40,7 @@ export class InlineGameView {
     if (!form.power_name) form.power_name = null;
     if (!form.registration_password) form.registration_password = null;
     form.game_id = this.game.game_id;
-    console.log("Game object in inline_game_view:", this.game);
-    console.log("Game ID:", this.game?.game_id);
+
     this.page.channel
       .joinGame(form)
       .then((networkGame) => {
@@ -66,8 +65,6 @@ export class InlineGameView {
   }
 
   showGame() {
-    console.log("Game object in inline_game_view:", this.game);
-    console.log("Ganon tumens D:", this.game?.game_id);
     this.page.load(
       `game: ${this.game.game_id}`,
       <ContentGame data={this.game} channel={this.page.channel} />
