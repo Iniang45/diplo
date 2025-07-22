@@ -70,7 +70,6 @@ class Notifier:
             return (notification.game_role in self.ignore_addresses
                     and notification.token in self.ignore_addresses[notification.game_role])
         return False
-
     @gen.coroutine
     def _notify(self, notification):
         """ Register a notification to send.

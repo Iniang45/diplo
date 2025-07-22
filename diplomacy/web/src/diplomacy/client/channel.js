@@ -25,8 +25,25 @@ export class Channel {
     this.token = token;
     this.username = username;
     this.game_id_to_instances = {};
+    this.eventHandlers = {};
+  }
+  on(eventName, handler) {
+    if (!this.eventHandlers[eventName]) {
+      this.eventHandlers[eventName] = [];
+    }
+    this.eventHandlers[eventName].push(handler);
   }
 
+  emit(eventName, data) {
+    if (this.eventHandlers[eventName]) {
+      this.eventHandlers[eventName].forEach((handler) => handler(data));
+    }
+  }
+
+  // Exemple : appeler emit lorsqu'une notification est reçue
+  handleNotification(notification) {
+    this.emit(notification.name, notification);
+  }
   localJoinGame(joinParameters) {
     // Game ID must be known.
     if (this.game_id_to_instances.hasOwnProperty(joinParameters.game_id)) {

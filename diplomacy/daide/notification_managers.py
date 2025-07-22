@@ -130,11 +130,20 @@ def on_processed_notification(server, notification, connection_handler, game):
         notifs += _build_completed_notifications(server.users, game.has_draw_vote(), powers, game.state_history)
 
     return notifs
+def on_game_users_updated(game, notification):
+    """ Manage notification GameUsersUpdated.
 
+        :param game: a Network game
+        :param notification: notification received
+        :type game: diplomacy.client.network_game.NetworkGame
+        :type notification: diplomacy.communication.notifications.GameUsersUpdated
+    """
+    print(f"Received GameUsersUpdated notification: {notification.players}")
+    game.update_players(notification.players)
 def on_status_update_notification(server, notification, connection_handler, game):
     """ Build the list of notificaitons for a status update event
 
-        :param server: server which receives the request
+        :param server: s erver which receives the request
         :param notification: internal notification
         :param connection_handler: connection handler from which the request was sent
         :param game: the game

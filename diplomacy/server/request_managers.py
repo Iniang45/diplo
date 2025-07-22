@@ -26,7 +26,6 @@
 """
 #pylint:disable=too-many-lines
 import logging
-import json
 from tornado import gen
 from tornado.concurrent import Future
 
@@ -116,17 +115,18 @@ def on_get_reception_addresses(server, request, connection_handler):
     reception_addresses = list(server_game.get_reception_addresses())
     print(f"Reception addresses: {reception_addresses}")
     
-    # Récupérer les noms d'utilisateurs à partir des tokens
-    usernames = []
+    # Récupérer les noms d'utilisateurs à partir des tokens, en évitant les doublons
+    usernames = set()  # Utiliser un ensemble pour garantir l'unicité
     for _, token in reception_addresses:
         username = server.users.get_name(token)
         if username:
-            usernames.append(username)
+            usernames.add(username)  # Ajouter le nom d'utilisateur à l'ensemble
     
-    print(f"Usernames found: {usernames}")
+    usernames_list = list(usernames)  # Convertir l'ensemble en liste pour la réponse
+    print(f"Unique usernames found: {usernames_list}")
     
     # Retourner un objet DataSavedGame contenant les usernames
-    return responses.DataSavedGame(data={'usernames': usernames}, request_id=request.request_id)
+    return responses.DataSavedGame(data={'usernames': usernames_list}, request_id=request.request_id)
 def on_create_game(server, request, connection_handler):
     """ Manage request CreateGame.
 

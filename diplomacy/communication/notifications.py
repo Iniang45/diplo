@@ -121,7 +121,6 @@ class VoteCountUpdated(_GameNotification):
         self.count_voted = None  # type: int
         self.count_expected = None  # type: int
         super(VoteCountUpdated, self).__init__(**kwargs)
-
 class VoteUpdated(_GameNotification):
     """ Notification about votes updated for a game (for omniscient observers).
 

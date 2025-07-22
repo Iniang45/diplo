@@ -307,7 +307,17 @@ def on_vote(context, response):
     assert Game.is_player_game(context.game)
     assert context.game.power.name == context.request.game_role
     context.game.power.vote = vote
+def on_get_reception_addresses(context, response):
+    """
+    Manage response for request GetReceptionAddresses.
 
+    :param context: request context
+    :param response: response received
+    :return: usernames list
+    :type context: RequestFutureContext
+    :type response: responses.DataSavedGame
+    """
+    return response.data['usernames']
 # Mapping dictionary from request class to response handler function.
 MAPPING = {
     requests.ClearCenters: on_clear_centers,
@@ -341,6 +351,7 @@ MAPPING = {
     requests.SignIn: on_sign_in,
     requests.Synchronize: default_manager,
     requests.Vote: on_vote,
+    requests.GetReceptionAddresses: on_get_reception_addresses,
 }
 
 def handle_response(context, response):
