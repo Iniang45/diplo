@@ -117,7 +117,7 @@ def validate_data(data, model):
     """
     assert isinstance(data, dict)
     assert isinstance(model, dict)
-
+    
     # Make sure all fields in data are of the correct type.
     # Also make sure all expected fields not present in data have default values (e.g. None).
     # NB: We don't care about extra keys in provided data. We only focus on expected keys.
@@ -125,6 +125,7 @@ def validate_data(data, model):
         try:
             get_type(model_type).validate(data.get(model_key, None))
         except exceptions.TypeException as exception:
+            print(model_key,model_type,data.get(model_key, None))
             LOGGER.error('Error occurred while checking key %s', model_key)
             raise exception
 

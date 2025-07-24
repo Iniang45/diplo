@@ -681,7 +681,21 @@ class SendGameMessage(_AbstractGameRequest):
     def __init__(self, **kwargs):
         self.message = None  # type: Message
         super(SendGameMessage, self).__init__(**kwargs)
+class SendPrivateMessage(_AbstractGameRequest):
+    """ Request to send a private message in a game.
 
+        Properties:
+            - **message**: The private message to send.
+            - **recipient**: The recipient of the private message.
+    """
+    __slots__ = ['message']
+    params = {
+        strings.MESSAGE: parsing.JsonableClassType(Message)
+    }
+
+    def __init__(self, **kwargs):
+        self.message = None  # type: Message
+        super(SendPrivateMessage, self).__init__(**kwargs)
 class SetDummyPowers(_AbstractGameRequest):
     """ Game request to set dummy powers. Require game master privileges.
         If given powers are controlled, related players are kicked
@@ -848,6 +862,7 @@ class Vote(_AbstractGameRequest):
         super(Vote, self).__init__(**kwargs)
 
 def parse_dict(json_request):
+    print(json_request)
     """ Parse a JSON dictionary expected to represent a request.
         Raise an exception if parsing failed.
 

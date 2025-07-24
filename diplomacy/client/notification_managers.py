@@ -116,7 +116,16 @@ def on_game_message_received(game, notification):
         :type notification: diplomacy.communication.notifications.GameMessageReceived
     """
     Game.add_message(game, notification.message)
+def on_private_message_received(game, notification):
+    """ Manage notification PrivateMessageReceived.
 
+        :param game: a Network game
+        :param notification: notification received
+        :type game: diplomacy.client.network_game.NetworkGame
+        :type notification: diplomacy.communication.notifications.PrivateMessageReceived
+    """
+    LOGGER.info(f"Private message received: {notification.message}")
+    game.add_private_message(notification.message)
 def on_game_processed(game, notification):
     """ Manage notification GamePhaseUpdate (for omniscient and observer games).
 
@@ -260,6 +269,7 @@ MAPPING = {
     notifications.PowerWaitFlag: on_power_wait_flag,
     notifications.VoteCountUpdated: on_vote_count_updated,
     notifications.VoteUpdated: on_vote_updated,
+    notifications.PrivateMessageReceived: on_private_message_received,
 }
 
 def handle_notification(connection, notification):

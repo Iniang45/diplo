@@ -224,7 +224,7 @@ class Game(Jsonable):
                  'convoy_paths_dest', 'zobrist_hash', 'renderer', 'game_id', 'map_name', 'role', 'rules',
                  'message_history', 'state_history', 'result_history', 'status', 'timestamp_created', 'n_controls',
                  'deadline', 'registration_password', 'observer_level', 'controlled_powers', '_phase_wrapper_type',
-                 'phase_abbr', '_unit_owner_cache', 'daide_port', 'fixed_state']
+                 'phase_abbr', '_unit_owner_cache', 'daide_port', 'fixed_state', '_private_messages']
     zobrist_tables = {}
     rule_cache = ()
     model = {
@@ -293,6 +293,7 @@ class Game(Jsonable):
         self.controlled_powers = None
         self.daide_port = None
         self.fixed_state = None
+        self._private_messages = SortedDict.builder(int, Message)({})
 
         # Caches
         self._unit_owner_cache = None               # {(unit, coast_required): owner}
@@ -873,7 +874,19 @@ class Game(Jsonable):
     # Vote methods. For server and omniscient games only.
     # Observer game should not see votes.
     # Power game should know only vote of related power (votes for all other power should be 'neutral' in a power game).
+    def add_private_message(self, message):
+        """ Add a private message to the server's message store.
 
+            :param message: The private message to add.
+            :type message: Message
+            :return: The timestamp of when the message was added.
+        """
+        assert isinstance(message, Message), "Expected a Message instance"
+        if message.time_sent is None:
+            # Génère un horodatage si nécessaire
+            message.time_sent = common.timestamp_microseconds()
+        self._private_messages.put(message.time_sent, message)
+        return message.time_sent
     def has_draw_vote(self):
         """ Return True if all controlled non-eliminated powers have voted YES to draw game at current phase. """
         assert self.is_server_game() or self.is_omniscient_game()
@@ -882,7 +895,21 @@ class Game(Jsonable):
             for power in self.powers.values()
             if not power.is_eliminated()
         )
+    def get_private_messages(self, recipient=None):
+        """ Retrieve private messages for the current player or a specific recipient.
 
+        :param recipient: (optional) Filter messages by recipient.
+        :return: List of private messages.
+        """
+        if not self._private_messages:
+            return []
+
+        if recipient:
+            return [
+                msg for msg in self._private_messages
+                if msg.recipient == recipient or msg.sender == recipient
+            ]
+        return self._private_messages
     def count_voted(self):
         """ Return the count of controlled powers who already voted for a draw for current phase. """
         assert self.is_server_game() or self.is_omniscient_game()

@@ -655,7 +655,7 @@ class Server:
             finally:
                 # This should be an internal server error.
                 raise exc
-
+    
     def add_new_game(self, server_game):
         """ Add a new game data on server in memory and perform any addition processing.
             This does not save the game on disk.

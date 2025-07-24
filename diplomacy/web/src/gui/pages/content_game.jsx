@@ -61,6 +61,7 @@ import { Bandeau } from "../components/bandeau";
 import { BandeauAdversaire } from "../components/bandeau_adversaire";
 import { ChatWindow } from "../components/chat_window";
 import { DropdownNavigation } from "../components/dropDownNavigation";
+import { PrivateMessageForm } from "../components/private_message_form";
 const HotKey = require("react-shortcut");
 /* Order management in game page.
  * When editing orders locally, we have to compare it to server orders
@@ -577,7 +578,34 @@ export class ContentGame extends React.Component {
       })
       .catch((error) => page.error(error.toString()));
   }
+  sendPrivateMessage(networkGame, recipient, body) {
+    if (!recipient) {
+      console.error("No recipient selected for private message.");
+      return;
+    }
 
+    const engine = networkGame.local;
+    const currentPowerName = this.getCurrentPowerName();
+
+    // Créer un objet Message similaire à sendMessage
+    const message = new Message({
+      phase: engine.phase,
+      sender: currentPowerName,
+      recipient: recipient,
+      message: body,
+    });
+
+    console.log("Sending private message:", message);
+    const page = this.getPage();
+
+    // Envoyer le message via sendPrivateMessage
+    networkGame.channel
+      .sendPrivateMessage({ message: message }, networkGame)
+      .then(() => {
+        page.success(`Private message sent to ${recipient}: ${body}`);
+      })
+      .catch((error) => page.error(error.toString()));
+  }
   onProcessGame() {
     const page = this.getPage();
     this.props.data.client
@@ -1168,6 +1196,7 @@ export class ContentGame extends React.Component {
                       id = `${protagonist}-unread`;
                     }
                   }
+
                   return (
                     <MessageView
                       key={index}
@@ -1194,6 +1223,7 @@ export class ContentGame extends React.Component {
             Go to 1st unread message
           </Scrollchor>
         )}
+        {/*
         <div className="message-recipient">
           <label htmlFor="recipient-select">Select recipient:</label>
           <select
@@ -1231,6 +1261,19 @@ export class ContentGame extends React.Component {
             }
           />
         )}
+        <div className="private-messages-section">
+          <PrivateMessageForm
+            connectedUsers={this.state.connectedUsers}
+            sendPrivateMessage={(recipient, message) =>
+              this.sendPrivateMessage(
+                this.props.data.client,
+                recipient,
+                message
+              )
+            }
+            gameInstance={this.props.data} // Passe l'instance du jeu
+          />
+        </div>
       </div>
     );
   }

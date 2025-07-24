@@ -159,6 +159,7 @@ class Channel:
     _get_phase_history = _req_fn(requests.GetPhaseHistory)
     _leave_game = _req_fn(requests.LeaveGame)
     _send_game_message = _req_fn(requests.SendGameMessage)
+    _send_private_message = _req_fn(requests.SendPrivateMessage)
     _set_orders = _req_fn(requests.SetOrders)
 
     _clear_centers = _req_fn(requests.ClearCenters)

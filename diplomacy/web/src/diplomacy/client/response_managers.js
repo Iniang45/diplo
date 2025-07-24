@@ -114,6 +114,11 @@ export const RESPONSE_MANAGERS = {
       throw new Error("Invalid response for get_reception_addresses");
     }
   },
+  send_private_message: function (context, response) {
+    const message = context.request.message;
+    message.time_sent = response.data; // Mettre à jour l'horodatage du message
+    context.game.local.addPrivateMessage(message); // Ajouter le message à l'état local du jeu
+  },
   handleResponse: function (context, response) {
     if (!RESPONSE_MANAGERS.hasOwnProperty(context.request.name))
       throw new Error(

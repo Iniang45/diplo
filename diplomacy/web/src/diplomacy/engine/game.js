@@ -56,6 +56,7 @@ export class Game {
       "game_id",
       "map_name",
       "messages",
+
       "role",
       "rules",
       "status",
@@ -85,7 +86,10 @@ export class Game {
       gameData instanceof Game ? null : gameData.messages,
       parseInt
     );
-
+    this.private_messages = new SortedDict(
+      gameData instanceof Game ? null : gameData.private_messages,
+      parseInt
+    );
     // {short phase name => state}
     this.state_history = new SortedDict(
       gameData instanceof Game
@@ -328,6 +332,40 @@ export class Game {
       return;
     }
     this.messages.put(message.time_sent, message);
+  }
+  addPrivateMessage(message) {
+    /** Add a private message to the game's private message store.
+     *
+     * @param {Message} message - The private message to add.
+     */
+    message = new Message(message); // Crée un nouvel objet Message à partir des données fournies
+
+    if (!message.time_sent) {
+      throw new Error("No time sent for the given private message.");
+    }
+
+    if (this.private_messages.hasOwnProperty(message.time_sent)) {
+      throw new Error(
+        "There is already a private message with time sent " +
+          message.time_sent +
+          " in private message history."
+      );
+    }
+
+    // Vérifie si le message est lié au joueur actuel
+    if (
+      this.isPlayerGame() &&
+      this.role !== message.sender &&
+      this.role !== message.recipient
+    ) {
+      throw new Error(
+        "Given private message is not related to the current player " +
+          this.role
+      );
+    }
+
+    // Ajoute le message à l'historique des messages privés
+    this.private_messages.put(message.time_sent, message);
   }
 
   assertPlayerGame(powerName) {
@@ -614,7 +652,24 @@ export class Game {
     }
     return messageChannels;
   }
+  getPrivateMessages() {
+    /** Retrieve private messages related to the current player.
+     *
+     * @return {Array} List of private messages.
+     */
+    const privateMessages = [];
 
+    // Parcourir tous les messages privés
+    console.log("Private messages:", this.private_messages);
+    for (let message of this.private_messages.values()) {
+      // Vérifier si le message est lié au joueur actuel
+      if (message.sender === this.role || message.recipient === this.role) {
+        privateMessages.push(message);
+      }
+    }
+
+    return privateMessages;
+  }
   markAllMessagesRead() {
     for (let message of this.messages.values()) {
       if (message.sender !== this.role) message.read = true;

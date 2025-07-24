@@ -224,7 +224,19 @@ def on_send_game_message(context, response):
     message = request.message
     message.time_sent = response.data
     Game.add_message(context.game, message)
+def on_send_private_message(context, response):
+    """ Manage response for request SendPrivateMessage.
 
+        :param context: request context
+        :param response: response received
+        :return: None
+        :type context: RequestFutureContext
+        :type response: responses.DataTimeStamp
+    """
+    request = context.request  # type: requests.SendPrivateMessage
+    message = request.message
+    message.time_sent = response.data  # Timestamp of when the message was sent
+    Game.add_private_message(context.game, message)  # Add the private message to the game
 def on_set_game_state(context, response):
     """ Manage response for request SetGameState.
 
@@ -352,6 +364,7 @@ MAPPING = {
     requests.Synchronize: default_manager,
     requests.Vote: on_vote,
     requests.GetReceptionAddresses: on_get_reception_addresses,
+    requests.SendPrivateMessage: on_send_private_message, 
 }
 
 def handle_response(context, response):

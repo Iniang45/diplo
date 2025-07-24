@@ -344,7 +344,26 @@ class Notifier:
                                                                      message=game_message))
             observer_addresses = server_game.get_observer_addresses()
             yield self.notify_game_addresses(server_game.game_id, observer_addresses, notifications.GameMessageReceived, message=game_message)
+    @gen.coroutine
+    def notify_private_message(self, game_id, recipient_role, recipient_token, message):
+        """ Notify a specific user about a private message.
 
+            :param game_id: The ID of the game.
+            :param recipient_role: The role of the recipient in the game (e.g., username or power name).
+            :param recipient_token: The token of the recipient.
+            :param message: The private message.
+            :type game_id: str
+            :type recipient_role: str
+            :type recipient_token: str
+            :type message: Message
+        """
+        # Utiliser notify_game_addresses pour envoyer la notification à un seul joueur
+        yield self.notify_game_addresses(
+            game_id=game_id,
+            addresses=[(recipient_role, recipient_token)],  # Une seule adresse
+            notification_class=notifications.PrivateMessageReceived,
+            message=message
+        )
     @gen.coroutine
     def notify_game_addresses(self, game_id, addresses, notification_class, **kwargs):
         """ Notify addresses of a game with a notification.

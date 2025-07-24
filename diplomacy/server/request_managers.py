@@ -816,18 +816,18 @@ def on_send_game_message(server, request, connection_handler):
     assert_game_not_finished(level.game)
     if level.game.no_press:
         raise exceptions.ResponseException('Messages not allowed for this game.')
-    """
-    # Si l'utilisateur est un observateur, utiliser currentPowerName comme sender
-    if request.game_role == strings.OBSERVER_TYPE:
-        currentPowerName = message.sender
-        print("Received currentPowerName:", currentPowerName)
-        print(level.game.map.powers)
-        request.game_role = currentPowerName
-        if level.game.has_power(currentPowerName):
-            message.sender = currentPowerName
-        else:
-            raise exceptions.MapPowerException(currentPowerName)
-    """
+    
+        #Si l'utilisateur est un observateur, utiliser currentPowerName comme sender
+        #if request.game_role == strings.OBSERVER_TYPE:
+        #    currentPowerName = message.sender
+        #    print("Received currentPowerName:", currentPowerName)
+        #    print(level.game.map.powers)
+        #    request.game_role = currentPowerName
+        #    if level.game.has_power(currentPowerName):
+        #        message.sender = currentPowerName
+        #    else:
+        #        raise exceptions.MapPowerException(currentPowerName)
+    
 
     if request.game_role != message.sender and request.game_role != strings.OBSERVER_TYPE:
         raise exceptions.ResponseException('A power can only send its own messages.')
@@ -871,7 +871,58 @@ def on_send_game_message(server, request, connection_handler):
     print(request.game_role)
     print(message)
     return responses.DataTimeStamp(data=message.time_sent, request_id=request.request_id)
+def on_send_private_message(server, request, connection_handler):
+    """ Manage request SendPrivateMessage.
 
+        :param server: server which receives the request.
+        :param request: request to manage.
+        :param connection_handler: connection handler from which the request was sent.
+        :return: None
+        :type server: diplomacy.Server
+        :type request: diplomacy.communication.requests.SendPrivateMessage
+    """
+    # Valider la requête et récupérer le niveau de jeu
+    level = verify_request(server, request, connection_handler, omniscient_role=False, observer_role=True)
+    token, message = request.token, request.message
+
+    # Valider l'expéditeur et le destinataire
+    sender = server.users.get_name(token)
+    recipient = message.recipient
+
+    if not sender:
+        raise exceptions.ResponseException("Sender is not authenticated.")
+    if not recipient or not server.users.has_username(recipient):
+        raise exceptions.ResponseException(f"Recipient '{recipient}' does not exist.")
+
+    # Empêcher l'envoi de messages à soi-même
+    if sender == recipient:
+        raise exceptions.ResponseException("A user cannot send a private message to themselves.")
+
+    # Vérifier que le message est valide
+    if not message.phase:
+        raise exceptions.ResponseException("Message phase is missing.")
+
+    # Ajouter le message au jeu
+    message.sender = sender
+    message.time_sent = level.game.add_private_message(message)
+
+    # Notifier le destinataire
+    recipient_tokens = server.users.get_tokens(recipient)
+    if not recipient_tokens:
+        raise exceptions.ResponseException(f"Recipient '{recipient}' is not connected.")
+    recipient_token = next(iter(recipient_tokens), None)
+    #print("ouga ouga",recipient_token)
+    Notifier(server).notify_private_message(
+        game_id=level.game.game_id,
+        recipient_role=recipient,
+        recipient_token=recipient_token,
+        message=message
+    )
+
+    # Sauvegarder l'état du jeu
+    server.save_game(level.game)
+
+    return responses.DataTimeStamp(data=message.time_sent, request_id=request.request_id)
 def on_set_dummy_powers(server, request, connection_handler):
     """ Manage request SetDummyPowers.
 
@@ -1283,6 +1334,7 @@ MAPPING = {
     requests.UnknownToken: on_unknown_token,
     requests.Vote: on_vote,
     GetReceptionAddresses: on_get_reception_addresses,
+    requests.SendPrivateMessage: on_send_private_message,
 }
 
 def handle_request(server, request, connection_handler):

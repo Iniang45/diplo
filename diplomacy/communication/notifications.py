@@ -248,7 +248,21 @@ class GameMessageReceived(_GameNotification):
     def __init__(self, **kwargs):
         self.message = None  # type: Message
         super(GameMessageReceived, self).__init__(**kwargs)
+class PrivateMessageReceived(_GameNotification):
+    """ Notification for a received private message.
 
+        Properties:
+            - **message**: The private message received.
+    """
+    __slots__ = ['message']
+    params = {
+        strings.MESSAGE: parsing.JsonableClassType(Message),
+    }
+
+    def __init__(self, **kwargs):
+
+        self.message = kwargs.pop('Message', Message)
+        super(PrivateMessageReceived, self).__init__(**kwargs)
 class PowerOrdersUpdate(_GameNotification):
     """ Notification about a power order update.
 
