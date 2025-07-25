@@ -569,6 +569,7 @@ export class ContentGame extends React.Component {
     });
     console.log("Sending message:", message, "zbouzboub", currentPowerName);
     const page = this.getPage();
+
     networkGame
       .sendGameMessage({ message: message, currentPowerName: currentPowerName })
       .then(() => {
@@ -593,11 +594,12 @@ export class ContentGame extends React.Component {
       sender: currentPowerName,
       recipient: recipient,
       message: body,
+      time_sent: Date.now(),
     });
 
     console.log("Sending private message:", message);
     const page = this.getPage();
-
+    engine.addPrivateMessage(message);
     // Envoyer le message via sendPrivateMessage
     networkGame.channel
       .sendPrivateMessage({ message: message }, networkGame)

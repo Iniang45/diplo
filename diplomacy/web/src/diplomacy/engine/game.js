@@ -366,6 +366,7 @@ export class Game {
 
     // Ajoute le message à l'historique des messages privés
     this.private_messages.put(message.time_sent, message);
+    console.log("Message ajouté à private_messages:", message);
   }
 
   assertPlayerGame(powerName) {
@@ -663,6 +664,12 @@ export class Game {
     console.log("Private messages:", this.private_messages);
     for (let message of this.private_messages.values()) {
       // Vérifier si le message est lié au joueur actuel
+      console.log(
+        "Checking message:",
+        message.sender,
+        message.recipient,
+        this.role
+      );
       if (message.sender === this.role || message.recipient === this.role) {
         privateMessages.push(message);
       }
