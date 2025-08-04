@@ -862,7 +862,7 @@ class Vote(_AbstractGameRequest):
         super(Vote, self).__init__(**kwargs)
 
 def parse_dict(json_request):
-    print(json_request)
+    #print(json_request)
     """ Parse a JSON dictionary expected to represent a request.
         Raise an exception if parsing failed.
 

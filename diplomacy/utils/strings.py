@@ -219,7 +219,7 @@ WINNERS = 'winners'
 WINTER_UNDECIDED_PLAYER_MODE = 'winter_undecided_player_mode'
 YES = 'yes'
 ZOBRIST_HASH = 'zobrist_hash'
-
+PRIVATE_MESSAGES = 'private_messages'
 # Special name sets.
 ALL_GAME_STATUSES = (FORMING, ACTIVE, PAUSED, COMPLETED, CANCELED)
 ALL_GRADE_UPDATES = {PROMOTE, DEMOTE}

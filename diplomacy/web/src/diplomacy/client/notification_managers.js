@@ -104,6 +104,10 @@ export const NOTIFICATION_MANAGERS = {
             game.local.getPower(power_name).vote = notification.vote[power_name];
         }
     },
+    private_message_received: function (game, notification) {
+        // Ajoute le message privé à la liste locale
+        game.local.addPrivateMessage(notification.message);
+    },
     handleNotification: function (connection, notification) {
         if (!NOTIFICATION_MANAGERS.hasOwnProperty(notification.name))
             throw new Error('No notification handler available for notification ' + notification.name);
@@ -113,12 +117,28 @@ export const NOTIFICATION_MANAGERS = {
             throw new Error('Unable to find channel related to notification ' + notification.name);
         let objectToNotify = connection.channels[notification.token];
         if (level === STRINGS.GAME) {
-            if (objectToNotify.game_id_to_instances.hasOwnProperty(notification.game_id)
-                && objectToNotify.game_id_to_instances[notification.game_id].has(notification.game_role))
-                objectToNotify = objectToNotify.game_id_to_instances[notification.game_id].get(notification.game_role);
-            else
+            let gis = objectToNotify.game_id_to_instances[notification.game_id];
+            if (gis) {
+                if (typeof gis.has === "function" && typeof gis.get === "function") {
+                    if (gis.has(notification.game_role)) {
+                        objectToNotify = gis.get(notification.game_role);
+                    } else {
+                        console.log("roles for this game (Map):", Array.from(gis.keys && gis.keys() || []));
+                        throw new Error('Unable to find game instance related to notification '
+                            + notification.name + '/' + notification.game_id + '/' + notification.game_role);
+                    }
+                } else if (notification.game_role in gis) {
+                    objectToNotify = gis[notification.game_role];
+                } else {
+                    console.log("roles for this game (object):", Object.keys(gis));
+                    throw new Error('Unable to find game instance related to notification '
+                        + notification.name + '/' + notification.game_id + '/' + notification.game_role);
+                }
+            } else {
+                console.log("game_id_to_instances:", objectToNotify.game_id_to_instances);
                 throw new Error('Unable to find game instance related to notification '
                     + notification.name + '/' + notification.game_id + '/' + notification.game_role);
+            }
         }
         handler(objectToNotify, notification);
         if (level === STRINGS.GAME)

@@ -125,7 +125,7 @@ def validate_data(data, model):
         try:
             get_type(model_type).validate(data.get(model_key, None))
         except exceptions.TypeException as exception:
-            print(model_key,model_type,data.get(model_key, None))
+            
             LOGGER.error('Error occurred while checking key %s', model_key)
             raise exception
 

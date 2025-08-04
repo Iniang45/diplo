@@ -34,6 +34,11 @@ def _get_game_to_notify(connection, notification):
         :type connection: diplomacy.Connection
         :type notification: diplomacy.communication.notifications._GameNotification
     """
+    print("token:", notification.token)
+    print("game_id:", notification.game_id)
+    print("game_role:", notification.game_role)
+    print("channel.games:", channel.game_id_to_instances.keys())
+    print("roles in game:", channel.game_id_to_instances[notification.game_id].keys())
     channel = connection.channels.get(notification.token, None)
     if channel and notification.game_id in channel.game_id_to_instances:
         return channel.game_id_to_instances[notification.game_id].get(notification.game_role)

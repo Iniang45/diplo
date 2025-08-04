@@ -138,7 +138,7 @@ def on_game_users_updated(game, notification):
         :type game: diplomacy.client.network_game.NetworkGame
         :type notification: diplomacy.communication.notifications.GameUsersUpdated
     """
-    print(f"Received GameUsersUpdated notification: {notification.players}")
+    #print(f"Received GameUsersUpdated notification: {notification.players}")
     game.update_players(notification.players)
 def on_status_update_notification(server, notification, connection_handler, game):
     """ Build the list of notificaitons for a status update event

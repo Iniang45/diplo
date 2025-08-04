@@ -154,6 +154,7 @@ export class ContentGame extends React.Component {
       showChatWindow: false, // État pour afficher ou masquer le ChatWindow
       chatRecipient: null, // Destinataire du chat
       connectedUsers: [],
+      privateMessageUpdate: 0,
     };
 
     // Bind some class methods to this instance.
@@ -476,6 +477,14 @@ export class ContentGame extends React.Component {
       this.notifiedNetworkGame(networkGame, notification)
     );
   }
+  notifiedPrivateMessageReceived(networkGame, notification) {
+  // Ajoute le message à l'instance locale
+  networkGame.local.addPrivateMessage(notification.message);
+  // Force la mise à jour du composant
+  this.setState((prevState) => ({
+    privateMessageUpdate: prevState.privateMessageUpdate + 1
+  }));
+}
 
   bindCallbacks(networkGame) {
     const collector = (game, notification) => {
@@ -488,6 +497,8 @@ export class ContentGame extends React.Component {
           return this.notifiedPowersControllers(networkGame, notification);
         case "game_message_received":
           return this.notifiedNewGameMessage(networkGame, notification);
+        case "private_message_received":
+          return this.notifiedPrivateMessageReceived(networkGame, notification);
         case "game_processed":
         case "game_phase_update":
           return this.notifiedGamePhaseUpdated(networkGame, notification);
@@ -567,8 +578,8 @@ export class ContentGame extends React.Component {
       recipient: actualRecipient,
       message: body,
     });
-    console.log("Sending message:", message, "zbouzboub", currentPowerName);
     const page = this.getPage();
+
 
     networkGame
       .sendGameMessage({ message: message, currentPowerName: currentPowerName })
@@ -1265,16 +1276,18 @@ export class ContentGame extends React.Component {
         )}
         <div className="private-messages-section">
           <PrivateMessageForm
-            connectedUsers={this.state.connectedUsers}
-            sendPrivateMessage={(recipient, message) =>
-              this.sendPrivateMessage(
-                this.props.data.client,
-                recipient,
-                message
-              )
-            }
-            gameInstance={this.props.data} // Passe l'instance du jeu
-          />
+  connectedUsers={this.state.connectedUsers}
+  sendPrivateMessage={(recipient, message) =>
+    this.sendPrivateMessage(
+      this.props.data.client,
+      recipient,
+      message
+    )
+  }
+  gameInstance={this.props.data}
+  username={this.props.data.client.channel.username}
+  privateMessageUpdate={this.state.privateMessageUpdate} 
+/>
         </div>
       </div>
     );
@@ -1476,7 +1489,6 @@ export class ContentGame extends React.Component {
               this.renderPastMessages(this.props.data, powerName)
             }
             onClose={() => this.toggleChatWindow(null)} // Ferme la fenêtre de chat
-            onViewHistory={this.handleViewHistory} // Passe la méthode pour afficher l'onglet des messages
             textColors={{
               controlledPower: POWER_COLORS[powerName] || "#95a5a6",
               recipientPower:

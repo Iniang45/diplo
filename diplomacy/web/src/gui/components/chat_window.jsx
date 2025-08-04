@@ -8,7 +8,6 @@ export const ChatWindow = ({
   renderPastMessages, // Prop pour afficher les anciens messages
   onClose, // Prop pour fermer la fenêtre
   textColors, // Prop pour les couleurs des textes
-  onViewHistory, // Nouvelle prop pour rediriger vers l'historique
 }) => {
   let messageInput = null;
 
@@ -51,12 +50,6 @@ export const ChatWindow = ({
           ➤
         </button>
       </div>
-      <button
-        className="history-button"
-        onClick={onViewHistory} // Appelle la méthode pour rediriger
-      >
-        View History
-      </button>
     </div>
   );
 };

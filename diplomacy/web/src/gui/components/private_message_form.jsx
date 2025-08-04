@@ -1,23 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "./private_message_form.css";
 
 export const PrivateMessageForm = ({
   connectedUsers,
-  sendPrivateMessage, // Remplace onSendPrivateMessage par sendPrivateMessage
-  gameInstance, // Instance du jeu pour récupérer les messages privés
+  sendPrivateMessage,
+  gameInstance,
+  username,
+  privateMessageUpdate,
 }) => {
   const [recipient, setRecipient] = useState("");
   const [message, setMessage] = useState("");
-  const [privateMessages, setPrivateMessages] = useState([]); // État pour les messages privés
-
-  // Charger les messages privés au montage du composant
-  useEffect(() => {
-    if (gameInstance) {
-      const messages = gameInstance.getPrivateMessages(); // Appel à la méthode de game.js
-      setPrivateMessages(messages);
-    }
-  }, [gameInstance]);
+  const privateMessages = gameInstance.getPrivateMessages(username);
+  const visibleMessages = privateMessages; 
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -25,16 +20,16 @@ export const PrivateMessageForm = ({
       alert("Please select a recipient and enter a message.");
       return;
     }
-    sendPrivateMessage(recipient, message); // Appelle sendPrivateMessage
-    setMessage(""); // Clear the message input after sending
+    sendPrivateMessage(recipient, message);
+    setMessage("");
   };
 
   return (
     <div className="private-message-form">
-      <h4>Send a Private Message</h4>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="private-recipient-select">Select recipient:</label>
+      <h4>messages privés</h4>
+      <form onSubmit={handleSubmit} className="pm-form">
+        <div className="form-group" style={{ display: "flex", flexDirection: "column", marginBottom: 10 }}>
+          <label htmlFor="private-recipient-select" style={{ marginBottom: 4, fontWeight: 500 }}>To :</label>
           <select
             id="private-recipient-select"
             className="form-control"
@@ -42,7 +37,7 @@ export const PrivateMessageForm = ({
             onChange={(event) => setRecipient(event.target.value)}
           >
             <option value="" disabled>
-              Select a user
+              Sélectionner un utilisateur
             </option>
             {connectedUsers && connectedUsers.length > 0 ? (
               connectedUsers.map((username, index) => (
@@ -51,35 +46,52 @@ export const PrivateMessageForm = ({
                 </option>
               ))
             ) : (
-              <option disabled>Loading...</option>
+              <option disabled>Chargement...</option>
             )}
           </select>
         </div>
-        <div className="form-group">
-          <label htmlFor="private-message-input">Message:</label>
+        <div className="form-group" style={{ display: "flex", flexDirection: "column", marginBottom: 10 }}>
+          <label htmlFor="private-message-input" style={{ marginBottom: 4, fontWeight: 500 }}>Message :</label>
           <textarea
             id="private-message-input"
             className="form-control"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Enter your message here..."
+            placeholder="Écris ton message ici..."
+            rows={3}
           />
         </div>
-        <button type="submit" className="btn btn-primary">
-          Send
+        <button type="submit" className="btn btn-primary btn-block">
+          Envoyer
         </button>
       </form>
 
-      <h4>Private Messages</h4>
+      <h4>Messages privés</h4>
       <div className="private-messages-list">
-        {privateMessages.length > 0 ? (
-          privateMessages.map((msg, index) => (
-            <div key={index} className="private-message">
-              <strong>{msg.sender}:</strong> {msg.body}
+        {visibleMessages.length > 0 ? (
+          visibleMessages.map((msg, index) => (
+            <div
+              key={index}
+              className={
+                "pm-bubble " +
+                (msg.sender === username
+                  ? "pm-bubble-sent"
+                  : "pm-bubble-received")
+              }
+            >
+              <div className="pm-bubble-header">
+                <span className="pm-avatar">
+                  {msg.sender.charAt(0).toUpperCase()}
+                </span>
+                <span className="pm-sender">
+                  {msg.sender === username ? "Moi" : msg.sender}
+                </span>
+              </div>
+              <div className="pm-bubble-body">{msg.message}</div>
             </div>
           ))
         ) : (
-          <p>No private messages yet.</p>
+          <p className="pm-empty">Aucun message privé pour l’instant.</p>
         )}
       </div>
     </div>
@@ -88,6 +100,8 @@ export const PrivateMessageForm = ({
 
 PrivateMessageForm.propTypes = {
   connectedUsers: PropTypes.arrayOf(PropTypes.string).isRequired,
-  sendPrivateMessage: PropTypes.func.isRequired, // Remplace onSendPrivateMessage
-  gameInstance: PropTypes.object.isRequired, // Instance du jeu
+  sendPrivateMessage: PropTypes.func.isRequired,
+  gameInstance: PropTypes.object.isRequired,
+  username: PropTypes.string.isRequired,
+  privateMessageUpdate: PropTypes.number.isRequired,
 };

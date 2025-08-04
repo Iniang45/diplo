@@ -353,16 +353,6 @@ export class Game {
     }
 
     // Vérifie si le message est lié au joueur actuel
-    if (
-      this.isPlayerGame() &&
-      this.role !== message.sender &&
-      this.role !== message.recipient
-    ) {
-      throw new Error(
-        "Given private message is not related to the current player " +
-          this.role
-      );
-    }
 
     // Ajoute le message à l'historique des messages privés
     this.private_messages.put(message.time_sent, message);
@@ -653,27 +643,21 @@ export class Game {
     }
     return messageChannels;
   }
-  getPrivateMessages() {
+  getPrivateMessages(username) {
     /** Retrieve private messages related to the current player.
      *
      * @return {Array} List of private messages.
      */
     const privateMessages = [];
 
-    // Parcourir tous les messages privés
-    console.log("Private messages:", this.private_messages);
+ 
     for (let message of this.private_messages.values()) {
-      // Vérifier si le message est lié au joueur actuel
-      console.log(
-        "Checking message:",
-        message.sender,
-        message.recipient,
-        this.role
-      );
-      if (message.sender === this.role || message.recipient === this.role) {
-        privateMessages.push(message);
-      }
+
+   
+      if (message.sender === username || message.recipient === username) {
+      privateMessages.push(message);
     }
+  }
 
     return privateMessages;
   }

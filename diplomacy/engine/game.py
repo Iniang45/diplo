@@ -224,7 +224,7 @@ class Game(Jsonable):
                  'convoy_paths_dest', 'zobrist_hash', 'renderer', 'game_id', 'map_name', 'role', 'rules',
                  'message_history', 'state_history', 'result_history', 'status', 'timestamp_created', 'n_controls',
                  'deadline', 'registration_password', 'observer_level', 'controlled_powers', '_phase_wrapper_type',
-                 'phase_abbr', '_unit_owner_cache', 'daide_port', 'fixed_state', '_private_messages']
+                 'phase_abbr', '_unit_owner_cache', 'daide_port', 'fixed_state', 'private_messages']
     zobrist_tables = {}
     rule_cache = ()
     model = {
@@ -259,6 +259,7 @@ class Game(Jsonable):
         strings.VICTORY: parsing.DefaultValueType(parsing.SequenceType(int), []),
         strings.WIN: parsing.DefaultValueType(int, 0),
         strings.ZOBRIST_HASH: parsing.DefaultValueType(int, 0),
+        strings.PRIVATE_MESSAGES: parsing.DefaultValueType(parsing.DictType(int, parsing.JsonableClassType(Message)), {}),
     }
 
     def __init__(self, game_id=None, **kwargs):
@@ -293,7 +294,7 @@ class Game(Jsonable):
         self.controlled_powers = None
         self.daide_port = None
         self.fixed_state = None
-        self._private_messages = SortedDict.builder(int, Message)({})
+        self.private_messages = SortedDict.builder(int, Message)({})
 
         # Caches
         self._unit_owner_cache = None               # {(unit, coast_required): owner}
@@ -385,6 +386,7 @@ class Game(Jsonable):
         self.result_history = SortedDict(self._phase_wrapper_type, dict,
                                          {self._phase_wrapper_type(key): value
                                           for key, value in self.result_history.items()})
+        self.private_messages = SortedDict.builder(int, Message)(kwargs.get(strings.PRIVATE_MESSAGES, {}))
 
     def __str__(self):
         """ Returns a string representation of the game instance """
@@ -885,7 +887,7 @@ class Game(Jsonable):
         if message.time_sent is None:
             # Génère un horodatage si nécessaire
             message.time_sent = common.timestamp_microseconds()
-        self._private_messages.put(message.time_sent, message)
+        self.private_messages.put(message.time_sent, message)
         return message.time_sent
     def has_draw_vote(self):
         """ Return True if all controlled non-eliminated powers have voted YES to draw game at current phase. """
@@ -901,15 +903,15 @@ class Game(Jsonable):
         :param recipient: (optional) Filter messages by recipient.
         :return: List of private messages.
         """
-        if not self._private_messages:
+        if not self.private_messages:
             return []
 
         if recipient:
             return [
-                msg for msg in self._private_messages
+                msg for msg in self.private_messages
                 if msg.recipient == recipient or msg.sender == recipient
             ]
-        return self._private_messages
+        return self.private_messages
     def count_voted(self):
         """ Return the count of controlled powers who already voted for a draw for current phase. """
         assert self.is_server_game() or self.is_omniscient_game()

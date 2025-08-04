@@ -597,7 +597,7 @@ def on_get_reception_addresses(server, request, connection_handler, game):
     """
     Handle the request to get reception addresses for a game.
     """
-    print(f"Received get_reception_addresses request for game ID: {request.game_id}")
+    #print(f"Received get_reception_addresses request for game ID: {request.game_id}")
     server_game = server.get_game(request.game_id)
     if not server_game:
         raise ValueError(f"Game with ID {request.game_id} not found.")

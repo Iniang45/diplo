@@ -102,19 +102,19 @@ def on_get_reception_addresses(server, request, connection_handler):
     :param connection_handler: The connection handler for the client.
     :return: A DataSavedGame response containing all usernames.
     """
-    print(f"Received get_reception_addresses request for game ID: {request.game_id}")
+    #print(f"Received get_reception_addresses request for game ID: {request.game_id}")
     
     # Récupérer l'instance de ServerGame
     server_game = server.get_game(request.game_id)
     if not server_game:
         raise exceptions.GameIdException(f"Game with ID {request.game_id} not found.")
     
-    print(f"Server game found: {server_game}")
+    #print(f"Server game found: {server_game}")
     
     # Récupérer toutes les adresses de réception
     reception_addresses = list(server_game.get_reception_addresses())
-    print(f"Reception addresses: {reception_addresses}")
-    
+    #print(f"Reception addresses: {reception_addresses}")
+
     # Récupérer les noms d'utilisateurs à partir des tokens, en évitant les doublons
     usernames = set()  # Utiliser un ensemble pour garantir l'unicité
     for _, token in reception_addresses:
@@ -123,7 +123,7 @@ def on_get_reception_addresses(server, request, connection_handler):
             usernames.add(username)  # Ajouter le nom d'utilisateur à l'ensemble
     
     usernames_list = list(usernames)  # Convertir l'ensemble en liste pour la réponse
-    print(f"Unique usernames found: {usernames_list}")
+    #print(f"Unique usernames found: {usernames_list}")
     
     # Retourner un objet DataSavedGame contenant les usernames
     return responses.DataSavedGame(data={'usernames': usernames_list}, request_id=request.request_id)
@@ -867,9 +867,7 @@ def on_send_game_message(server, request, connection_handler):
     message.time_sent = level.game.add_message(message)
     Notifier(server, ignore_addresses=[(request.game_role, token)]).notify_game_message(level.game, message)
     server.save_game(level.game)
-    print(message.recipient)
-    print(request.game_role)
-    print(message)
+    
     return responses.DataTimeStamp(data=message.time_sent, request_id=request.request_id)
 def on_send_private_message(server, request, connection_handler):
     """ Manage request SendPrivateMessage.
@@ -882,7 +880,7 @@ def on_send_private_message(server, request, connection_handler):
         :type request: diplomacy.communication.requests.SendPrivateMessage
     """
     # Valider la requête et récupérer le niveau de jeu
-    level = verify_request(server, request, connection_handler, omniscient_role=False, observer_role=True)
+    level = verify_request(server, request, connection_handler, omniscient_role=True, observer_role=True)
     token, message = request.token, request.message
 
     # Valider l'expéditeur et le destinataire
@@ -908,17 +906,34 @@ def on_send_private_message(server, request, connection_handler):
 
     # Notifier le destinataire
     recipient_tokens = server.users.get_tokens(recipient)
+    print("Tokens for recipient:", recipient_tokens)
     if not recipient_tokens:
         raise exceptions.ResponseException(f"Recipient '{recipient}' is not connected.")
     recipient_token = next(iter(recipient_tokens), None)
-    #print("ouga ouga",recipient_token)
-    Notifier(server).notify_private_message(
-        game_id=level.game.game_id,
-        recipient_role=recipient,
-        recipient_token=recipient_token,
-        message=message
-    )
+    print("Recipient token:", recipient_token)
+    recipient_power = None
+    for power in level.game.powers.keys():
+        # power.controller est un SortedDict ou dict
+        print("power", power, level.game.powers[power].controller)
+        print("Type de level.game.powers[power]:", type(level.game.powers[power].controller))
+        if recipient in level.game.powers[power].controller.values():
+            recipient_power = power        
 
+    # Si jamais c'est un seul nom (rare), on garde la compatibilité
+    print("elle sont là les quenouilles", recipient_power)
+    if not recipient_power:
+        recipient_power = strings.OBSERVER_TYPE
+    
+  
+    for recipient_token in recipient_tokens:
+        Notifier(server).notify_private_message(
+            game_id=level.game.game_id,
+            recipient_role=recipient_power,
+            recipient_token=recipient_token,
+            message=message
+        )
+    print("are you strong because naah", recipient_power)
+    print("le recipient ", recipient)
     # Sauvegarder l'état du jeu
     server.save_game(level.game)
 
@@ -1356,11 +1371,11 @@ def handle_request(server, request, connection_handler):
     # Create and return a future.
     future = Future()
     try:
-        print(f"Calling handler for request: {type(request).__name__}")
+        #print(f"Calling handler for request: {type(request).__name__}")
         result = request_handler_fn(server, request, connection_handler)
-        print(f"Handler result: {result}")
+        #print(f"Handler result: {result}")
         future.set_result(result)
     except exceptions.DiplomacyException as exc:
-        print(f"Exception in handler: {exc}")
+        #print(f"Exception in handler: {exc}")
         future.set_exception(exc)
     return future
