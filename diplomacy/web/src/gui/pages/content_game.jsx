@@ -219,6 +219,11 @@ export class ContentGame extends React.Component {
     else if (remainingTime) title += ` (remaining ${remainingTime} sec)`;
     return title;
   }
+  static deadline(game) {
+    const remainingTime = game.deadline_timer;
+    if (remainingTime === undefined) return `Deadline: ${game.deadline} sec`;
+    return `Remaining: ${remainingTime} sec`;
+  }
 
   static getServerWaitFlags(engine) {
     const wait = {};
@@ -465,7 +470,6 @@ export class ContentGame extends React.Component {
   }
 
   notifiedNewGameMessage(networkGame, notification) {
-    console.log("New game message notification:", notification);
     let protagonist = notification.message.sender;
     if (notification.message.recipient === "GLOBAL")
       protagonist = notification.message.recipient;
@@ -478,20 +482,19 @@ export class ContentGame extends React.Component {
     );
   }
   notifiedPrivateMessageReceived(networkGame, notification) {
-  // Ajoute le message à l'instance locale
-  networkGame.local.addPrivateMessage(notification.message);
-  // Force la mise à jour du composant
-  this.setState((prevState) => ({
-    privateMessageUpdate: prevState.privateMessageUpdate + 1
-  }));
-}
+    // Ajoute le message à l'instance locale
+    networkGame.local.addPrivateMessage(notification.message);
+    // Force la mise à jour du composant
+    this.setState((prevState) => ({
+      privateMessageUpdate: prevState.privateMessageUpdate + 1,
+    }));
+  }
 
   bindCallbacks(networkGame) {
     const collector = (game, notification) => {
       game.queue.append(notification);
     };
     const consumer = (notification) => {
-      console.log("Notification received:", notification.name);
       switch (notification.name) {
         case "powers_controllers":
           return this.notifiedPowersControllers(networkGame, notification);
@@ -580,7 +583,6 @@ export class ContentGame extends React.Component {
     });
     const page = this.getPage();
 
-
     networkGame
       .sendGameMessage({ message: message, currentPowerName: currentPowerName })
       .then(() => {
@@ -608,7 +610,6 @@ export class ContentGame extends React.Component {
       time_sent: Date.now(),
     });
 
-    console.log("Sending private message:", message);
     const page = this.getPage();
     engine.addPrivateMessage(message);
     // Envoyer le message via sendPrivateMessage
@@ -1276,18 +1277,18 @@ export class ContentGame extends React.Component {
         )}
         <div className="private-messages-section">
           <PrivateMessageForm
-  connectedUsers={this.state.connectedUsers}
-  sendPrivateMessage={(recipient, message) =>
-    this.sendPrivateMessage(
-      this.props.data.client,
-      recipient,
-      message
-    )
-  }
-  gameInstance={this.props.data}
-  username={this.props.data.client.channel.username}
-  privateMessageUpdate={this.state.privateMessageUpdate} 
-/>
+            connectedUsers={this.state.connectedUsers}
+            sendPrivateMessage={(recipient, message) =>
+              this.sendPrivateMessage(
+                this.props.data.client,
+                recipient,
+                message
+              )
+            }
+            gameInstance={this.props.data}
+            username={this.props.data.client.channel.username}
+            privateMessageUpdate={this.state.privateMessageUpdate}
+          />
         </div>
       </div>
     );
@@ -1363,6 +1364,8 @@ export class ContentGame extends React.Component {
     const orders = {};
     const currentPower = gameEngine.getPower(powerName);
     const page = this.context;
+    const deadline = ContentGame.deadline(gameEngine);
+
     const navigation = [
       ["Help", () => page.dialog((onClose) => <Help onClose={onClose} />)],
       ["Load a game from disk", page.loadGameFromDisk],
@@ -1387,10 +1390,31 @@ export class ContentGame extends React.Component {
       ENGLAND: "#9400d3", // Gris foncé
       AUSTRIA: "#c48f85", // Orange
     };
-    console.log(currentPower.controller);
-    Object.keys(gameEngine.powers).forEach((powerName) => {
-      console.log("Power Name:", powerName);
-    });
+    const controllablePowers = gameEngine.getControllablePowers();
+    const powerSelector = controllablePowers.length > 1 && (
+      <form
+        className="form-inline form-current-power"
+        style={{ marginBottom: 8 }}
+      >
+        <div className="custom-control custom-control-inline">
+          <label className="sr-only" htmlFor="current-power-in-map">
+            power
+          </label>
+          <select
+            className="form-control custom-select custom-control-inline"
+            id="current-power-in-map"
+            value={powerName}
+            onChange={this.onChangeCurrentPower}
+          >
+            {controllablePowers.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </div>
+      </form>
+    );
     for (let entry of Object.entries(rawOrders)) {
       orders[entry[0]] = [];
       if (entry[1]) {
@@ -1398,7 +1422,7 @@ export class ContentGame extends React.Component {
           orders[entry[0]].push(orderObject.order); // Conserve uniquement la chaîne `order`
       }
     }
-    console.log("Orders:", orders);
+
     return (
       <div id="current-map" key="current-map" className="map-container">
         <div className="order-type-select">
@@ -1415,24 +1439,26 @@ export class ContentGame extends React.Component {
             <option value="H">Hold</option>
             <option value="C">Convoy</option>
           </select>
+          <div className="deadline">
+            <p>{deadline} </p>
+            {powerSelector}
+          </div>
         </div>
 
-        <div className="bandeau-wrapper">
-          {/* Bandeau principal */}
-          <Bandeau
-            powerName={powerName}
-            troopCount={currentPower.units.length}
-            color={POWER_COLORS[powerName] || "#95a5a6"}
-            onDeleteOrders={this.onRemoveAllCurrentPowerOrders}
-            onVoteDraw={() => this.vote()}
-            currentVote={gameEngine.powers[powerName].vote || "neutral"} // Passe la valeur actuelle du vote
-            onOpenMessages={this.toggleChatWindow}
-            orders={rawOrders[powerName]} // Convertit en tableau si nécessaire
-            onRemoveOrder={this.onRemoveOrder}
-            setOrders={this.setOrders}
-          />
-
-          <div className="bandeau-container">
+        <div id="current-map" className="map-bandeau-flex">
+          <div className="bandeaux-col-overlay">
+            <Bandeau
+              powerName={powerName}
+              troopCount={currentPower.units.length}
+              color={POWER_COLORS[powerName] || "#95a5a6"}
+              onDeleteOrders={this.onRemoveAllCurrentPowerOrders}
+              onVoteDraw={() => this.vote()}
+              currentVote={gameEngine.powers[powerName].vote || "neutral"}
+              onOpenMessages={this.toggleChatWindow}
+              orders={rawOrders[powerName]}
+              onRemoveOrder={this.onRemoveOrder}
+              setOrders={this.setOrders}
+            />
             {Object.keys(gameEngine.powers)
               .filter((power) => power !== powerName)
               .map((adversaryPowerName) => (
@@ -1446,37 +1472,39 @@ export class ContentGame extends React.Component {
                   controller={
                     gameEngine.powers[adversaryPowerName].controller
                       .__values[1] || "dummy"
-                  } // Convertit en chaîne de caractères // Passe le contrôleur correc
+                  }
                   isWaiting={gameEngine.powers[adversaryPowerName].wait}
-                  onOpenMessages={this.toggleChatWindow} // Passe la fonction pour ouvrir le chat
+                  onOpenMessages={this.toggleChatWindow}
                 />
               ))}
           </div>
+          <div className="navigation-top-right">
+            <DropdownNavigation
+              navigation={navigation} // Passez les éléments de navigation
+              username={page.channel.username} // Passez le nom d'utilisateur
+            />
+          </div>
+          <div className="map-col">
+            <Map
+              game={gameEngine}
+              showAbbreviations={this.state.showAbbreviations}
+              mapData={
+                new MapData(this.getMapInfo(gameEngine.map_name), gameEngine)
+              }
+              onError={this.getPage().error}
+              orderBuilding={ContentGame.getOrderBuilding(
+                powerName,
+                orderType,
+                orderPath
+              )}
+              onOrderBuilding={this.onOrderBuilding}
+              onOrderBuilt={this.onOrderBuilt}
+              orders={orders}
+              onSelectLocation={this.onSelectLocation}
+              onSelectVia={this.onSelectVia}
+            />
+          </div>
         </div>
-        <div className="navigation-top-right">
-          <DropdownNavigation
-            navigation={navigation} // Passez les éléments de navigation
-            username={page.channel.username} // Passez le nom d'utilisateur
-          />
-        </div>
-        <Map
-          game={gameEngine}
-          showAbbreviations={this.state.showAbbreviations}
-          mapData={
-            new MapData(this.getMapInfo(gameEngine.map_name), gameEngine)
-          }
-          onError={this.getPage().error}
-          orderBuilding={ContentGame.getOrderBuilding(
-            powerName,
-            orderType, // Utilisez directement l'état
-            orderPath
-          )}
-          onOrderBuilding={this.onOrderBuilding}
-          onOrderBuilt={this.onOrderBuilt}
-          orders={orders}
-          onSelectLocation={this.onSelectLocation}
-          onSelectVia={this.onSelectVia}
-        />
 
         {this.state.showChatWindow && (
           <ChatWindow
@@ -1496,16 +1524,25 @@ export class ContentGame extends React.Component {
             }}
           />
         )}
-
         <div className="ibou">
           <button
             className={`ibra ${
               currentPower.wait ? "btn-wait-true" : "btn-wait-false"
             }`}
-            onClick={() => this.setWaitFlag(!currentPower.wait)} // Bascule entre true et false
+            onClick={() => this.setWaitFlag(!currentPower.wait)}
           >
             {currentPower.wait ? "Cancel Ready" : "Ready"}
           </button>
+          {/* Ajoute ici le bouton process game */}
+          {!this.props.data.isPlayerGame() &&
+            this.props.data.observer_level === STRINGS.MASTER_TYPE && (
+              <Button
+                color="danger"
+                title="process game"
+                onClick={this.onProcessGame}
+                style={{ marginLeft: 12 }}
+              />
+            )}
         </div>
       </div>
     );
@@ -2013,7 +2050,6 @@ export class ContentGame extends React.Component {
     if (this.props.data.role === STRINGS.OBSERVER_TYPE) {
       this.showNationSelectionDialog(); // Affiche la boîte de dialogue pour choisir une nation
     }
-    console.log("Channel in ContentGame:", this.props.channel);
     this.fetchReceptionAddresses();
     // Try to prevent scrolling when pressing keys Home and End.
     document.onkeydown = (event) => {

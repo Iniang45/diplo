@@ -107,7 +107,6 @@ export const RESPONSE_MANAGERS = {
   },
   get_reception_addresses: function (context, response) {
     if (RESPONSES.isOk(response)) {
-      console.log("Reception addresses received:", response.data);
       return response.data;
     } else {
       console.error("Failed to fetch reception addresses:", response);

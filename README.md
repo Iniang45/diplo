@@ -82,7 +82,8 @@ pip install -r requirements_dev.txt
 cd diplomacy/web
 npm install .
 npm install . --only=dev
-
+#if you are running a recent version Node.Js do this line
+$env:NODE_OPTIONS="--openssl-legacy-provider"
 # In a terminal window or tab - Launch React server
 npm start
 
@@ -101,7 +102,6 @@ To login, users can use admin/password or username/password. Additional users ca
 It is possible to visualize a game by using the "Load a game from disk" menu on the top-right corner of the web interface.
 
 ![](docs/images/visualize_game.png)
-
 
 ## Network Game
 
@@ -165,6 +165,7 @@ if __name__ == '__main__':
     asyncio.run(launch(game_id=str(random.randint(1, 1000))))
 
 ```
+
 ## License
 
 This project is licensed under the APGLv3 License - see the [LICENSE](LICENSE) file for details

@@ -906,21 +906,20 @@ def on_send_private_message(server, request, connection_handler):
 
     # Notifier le destinataire
     recipient_tokens = server.users.get_tokens(recipient)
-    print("Tokens for recipient:", recipient_tokens)
+
     if not recipient_tokens:
         raise exceptions.ResponseException(f"Recipient '{recipient}' is not connected.")
     recipient_token = next(iter(recipient_tokens), None)
-    print("Recipient token:", recipient_token)
+
     recipient_power = None
     for power in level.game.powers.keys():
         # power.controller est un SortedDict ou dict
-        print("power", power, level.game.powers[power].controller)
-        print("Type de level.game.powers[power]:", type(level.game.powers[power].controller))
+
         if recipient in level.game.powers[power].controller.values():
             recipient_power = power        
 
     # Si jamais c'est un seul nom (rare), on garde la compatibilité
-    print("elle sont là les quenouilles", recipient_power)
+
     if not recipient_power:
         recipient_power = strings.OBSERVER_TYPE
     
@@ -932,8 +931,7 @@ def on_send_private_message(server, request, connection_handler):
             recipient_token=recipient_token,
             message=message
         )
-    print("are you strong because naah", recipient_power)
-    print("le recipient ", recipient)
+
     # Sauvegarder l'état du jeu
     server.save_game(level.game)
 
