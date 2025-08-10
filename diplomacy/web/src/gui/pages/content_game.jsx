@@ -34,11 +34,11 @@ import { PowerOrders } from "../components/power_orders";
 import { MessageView } from "../components/message_view";
 import { STRINGS } from "../../diplomacy/utils/strings";
 import { Diplog } from "../../diplomacy/utils/diplog";
-import { Table } from "../components/table";
-import { PowerView } from "../utils/power_view";
+//import { Table } from "../components/table";
+//import { PowerView } from "../utils/power_view";
 import { DipStorage } from "../utils/dipStorage";
-import Helmet from "react-helmet";
-import { Navigation } from "../components/navigation";
+//import Helmet from "react-helmet";
+//import { Navigation } from "../components/navigation";
 import { PageContext } from "../components/page_context";
 import PropTypes from "prop-types";
 import { Help } from "../components/help";
@@ -46,7 +46,7 @@ import { Tab } from "../components/tab";
 import { Button } from "../components/button";
 import { saveGameToDisk } from "../utils/saveGameToDisk";
 import { Game } from "../../diplomacy/engine/game";
-import { PowerOrdersActionBar } from "../components/power_orders_actions_bar";
+//import { PowerOrdersActionBar } from "../components/power_orders_actions_bar";
 import { SvgStandard } from "../maps/standard/SvgStandard";
 import { SvgAncMed } from "../maps/ancmed/SvgAncMed";
 import { SvgModern } from "../maps/modern/SvgModern";
@@ -78,13 +78,14 @@ const HotKey = require("react-shortcut");
  * {orders}  {}         1 (different, user wants to delete all server orders, will result to "no-orders")
  * {orders}  {orders}   same if we have exactly same orders on both server and local
  * */
-
+/*
 const TABLE_POWER_VIEW = {
   name: ["Power", 0],
   controller: ["Controller", 1],
   order_is_set: ["With orders", 2],
   wait: ["Waiting", 3],
 };
+*/
 
 const PRETTY_ROLES = {
   [STRINGS.OMNISCIENT_TYPE]: "Omnicient",
@@ -1377,10 +1378,6 @@ export class ContentGame extends React.Component {
       ],
       [`${UTILS.html.UNICODE_SMALL_LEFT_ARROW} Logout`, page.logout],
     ];
-    const adversaryPowers = Object.keys(gameEngine.powers)
-
-      .filter((power) => power !== powerName) // Exclure la puissance contrôlée
-      .map((adversaryPowerName) => gameEngine.getPower(adversaryPowerName)); // Récupérer les objets des puissances adverses
     const POWER_COLORS = {
       FRANCE: "#4169e1", // Bleu
       GERMANY: "#a08a75", // Vert
@@ -1455,7 +1452,7 @@ export class ContentGame extends React.Component {
               onVoteDraw={() => this.vote()}
               currentVote={gameEngine.powers[powerName].vote || "neutral"}
               onOpenMessages={this.toggleChatWindow}
-              orders={rawOrders[powerName]}
+              orders={rawOrders[powerName] || {}}
               onRemoveOrder={this.onRemoveOrder}
               setOrders={this.setOrders}
             />
@@ -1809,7 +1806,7 @@ export class ContentGame extends React.Component {
 
     const powerNames = Object.keys(engine.powers);
     powerNames.sort();
-    const orderedPowers = powerNames.map((pn) => engine.powers[pn]);
+    //const orderedPowers = powerNames.map((pn) => engine.powers[pn]);
     return (
       <Tab id={"tab-current-phase"} display={toDisplay}>
         {
@@ -1840,9 +1837,10 @@ export class ContentGame extends React.Component {
 
   render() {
     this.props.data.displayed = true;
-    const page = this.context;
+    //const page = this.context;
     const engine = this.props.data;
-    const title = ContentGame.gameTitle(engine);
+    //const title = ContentGame.gameTitle(engine);
+    /*
     const navigation = [
       ["Help", () => page.dialog((onClose) => <Help onClose={onClose} />)],
       ["Load a game from disk", page.loadGameFromDisk],
@@ -1854,6 +1852,7 @@ export class ContentGame extends React.Component {
       ],
       [`${UTILS.html.UNICODE_SMALL_LEFT_ARROW} Logout`, page.logout],
     ];
+    */
     const phaseType = engine.getPhaseType();
     const controllablePowers = engine.getControllablePowers();
     if (this.props.data.client) this.bindCallbacks(this.props.data.client);
@@ -1867,13 +1866,15 @@ export class ContentGame extends React.Component {
 
     const tabNames = [];
     const tabTitles = [];
-    let hasTabPhaseHistory = false;
+    //let hasTabPhaseHistory = false;
     let hasTabCurrentPhase = false;
+    /*
     if (engine.state_history.size()) {
       hasTabPhaseHistory = true;
       tabNames.push("phase_history");
       tabTitles.push("Results");
     }
+    */
 
     tabNames.push("messages");
     tabTitles.push("Messages");
@@ -1918,7 +1919,7 @@ export class ContentGame extends React.Component {
       }
       buildCount = engine.getBuildsCount(currentPowerName);
     }
-
+    /*
     const navAfterTitle = (
       <form className="form-inline form-current-power">
         {(controllablePowers.length === 1 && (
@@ -1941,7 +1942,9 @@ export class ContentGame extends React.Component {
               ))}
             </select>
           </div>
+        
         )}
+        
         <div className="custom-control custom-control-inline custom-checkbox">
           <input
             className="custom-control-input"
@@ -1956,7 +1959,7 @@ export class ContentGame extends React.Component {
         </div>
       </form>
     );
-
+    */
     const currentTabOrderCreation = hasTabCurrentPhase && (
       <div>
         <PowerOrderCreationForm

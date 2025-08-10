@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "./bandeau.css";
 import chat from "./chat_bubble.png"; // Assuming the chat icon is in this path
-import { Order_window } from "./order_window"; // Import du composant OrdersWindow
+import { Order_window as OrderWindow } from "./order_window"; // Import du composant OrdersWindow
 
 export const Bandeau = ({
   powerName,
@@ -91,7 +91,7 @@ export const Bandeau = ({
       </div>
       {/* Affichage de OrdersWindow EN DEHORS du bandeau */}
       {showOrdersWindow && (
-        <Order_window
+        <OrderWindow
           name={powerName}
           orders={orders}
           wait={false}
